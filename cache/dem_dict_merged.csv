@@ -1,0 +1,88 @@
+easyVariableName,surveyBlock_glad,itemLabel,recodeLevel,valueLabel_glad,glad,qid_coping,surveyBlock_coping,valueLabel_coping,coping
+phq.anhedonia.1,GLAD,Little interest or pleasure in doing things,0,Not at all,TRUE,QID124931323_1,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.anhedonia.1,GLAD,Little interest or pleasure in doing things,1,Several days,TRUE,QID124931323_1,COVID_Baseline_PHQ9,Several days,TRUE
+phq.anhedonia.1,GLAD,Little interest or pleasure in doing things,2,More than half the days,TRUE,QID124931323_1,COVID_Baseline_PHQ9,More than half the days,TRUE
+phq.anhedonia.1,GLAD,Little interest or pleasure in doing things,3,Nearly every day,TRUE,QID124931323_1,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.depressed_mood.1,GLAD,"Feeling down, depressed or hopeless",0,Not at all,TRUE,QID124931323_2,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.depressed_mood.1,GLAD,"Feeling down, depressed or hopeless",1,Several days,TRUE,QID124931323_2,COVID_Baseline_PHQ9,Several days,TRUE
+phq.depressed_mood.1,GLAD,"Feeling down, depressed or hopeless",2,More than half the days,TRUE,QID124931323_2,COVID_Baseline_PHQ9,More than half the days,TRUE
+phq.depressed_mood.1,GLAD,"Feeling down, depressed or hopeless",3,Nearly every day,TRUE,QID124931323_2,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.sleep_change.1,GLAD,"Trouble falling or staying asleep, or sleeping too much",0,Not at all,TRUE,QID124931323_3,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.sleep_change.1,GLAD,"Trouble falling or staying asleep, or sleeping too much",1,Several days,TRUE,QID124931323_3,COVID_Baseline_PHQ9,Several days,TRUE
+phq.sleep_change.1,GLAD,"Trouble falling or staying asleep, or sleeping too much",2,More than half the days,TRUE,QID124931323_3,COVID_Baseline_PHQ9,More than half the days,TRUE
+phq.sleep_change.1,GLAD,"Trouble falling or staying asleep, or sleeping too much",3,Nearly every day,TRUE,QID124931323_3,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.little_energy.1,GLAD,Feeling tired or having little energy,0,Not at all,TRUE,QID124931323_4,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.little_energy.1,GLAD,Feeling tired or having little energy,1,Several days,TRUE,QID124931323_4,COVID_Baseline_PHQ9,Several days,TRUE
+phq.little_energy.1,GLAD,Feeling tired or having little energy,2,More than half the days,TRUE,QID124931323_4,COVID_Baseline_PHQ9,More than half the days,TRUE
+phq.little_energy.1,GLAD,Feeling tired or having little energy,3,Nearly every day,TRUE,QID124931323_4,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.eating_problems.1,GLAD,Poor appetite or overeating,0,Not at all,TRUE,QID124931323_5,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.eating_problems.1,GLAD,Poor appetite or overeating,1,Several days,TRUE,QID124931323_5,COVID_Baseline_PHQ9,Several days,TRUE
+phq.eating_problems.1,GLAD,Poor appetite or overeating,2,More than half the days,TRUE,QID124931323_5,COVID_Baseline_PHQ9,More than half the days,TRUE
+phq.eating_problems.1,GLAD,Poor appetite or overeating,3,Nearly every day,TRUE,QID124931323_5,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.worthlessness.1,GLAD,Feeling bad about yourself or that you are a failure or have let yourself or your family down,0,Not at all,TRUE,QID124931323_6,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.worthlessness.1,GLAD,Feeling bad about yourself or that you are a failure or have let yourself or your family down,1,Several days,TRUE,QID124931323_6,COVID_Baseline_PHQ9,Several days,TRUE
+phq.worthlessness.1,GLAD,Feeling bad about yourself or that you are a failure or have let yourself or your family down,2,More than half the days,TRUE,QID124931323_6,COVID_Baseline_PHQ9,More than half the days,TRUE
+phq.worthlessness.1,GLAD,Feeling bad about yourself or that you are a failure or have let yourself or your family down,3,Nearly every day,TRUE,QID124931323_6,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.concentration_problems.1,GLAD,"Trouble concentrating on things, such as reading the newspaper or watching television",0,Not at all,TRUE,QID124931323_7,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.concentration_problems.1,GLAD,"Trouble concentrating on things, such as reading the newspaper or watching television",1,Several days,TRUE,QID124931323_7,COVID_Baseline_PHQ9,Several days,TRUE
+phq.concentration_problems.1,GLAD,"Trouble concentrating on things, such as reading the newspaper or watching television",2,More than half the days,TRUE,QID124931323_7,COVID_Baseline_PHQ9,More than half the days,TRUE
+phq.concentration_problems.1,GLAD,"Trouble concentrating on things, such as reading the newspaper or watching television",3,Nearly every day,TRUE,QID124931323_7,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.motor_problems.1,GLAD,"Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",0,Not at all,TRUE,QID124931323_8,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.motor_problems.1,GLAD,"Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",1,Several days,TRUE,QID124931323_8,COVID_Baseline_PHQ9,Several days,TRUE
+phq.motor_problems.1,GLAD,"Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",2,More than half the days,TRUE,QID124931323_8,COVID_Baseline_PHQ9,More than half the days,TRUE
+phq.motor_problems.1,GLAD,"Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",3,Nearly every day,TRUE,QID124931323_8,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.suicide_ideation.1,GLAD,Thoughts that you would be better off dead or of hurting yourself in some way,0,Not at all,TRUE,QID124931323_9,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.suicide_ideation.1,GLAD,Thoughts that you would be better off dead or of hurting yourself in some way,1,Several days,TRUE,QID124931323_9,COVID_Baseline_PHQ9,Several days,TRUE
+phq.suicide_ideation.1,GLAD,Thoughts that you would be better off dead or of hurting yourself in some way,2,More than half the days,TRUE,QID124931323_9,COVID_Baseline_PHQ9,More than half the days,TRUE
+phq.suicide_ideation.1,GLAD,Thoughts that you would be better off dead or of hurting yourself in some way,3,Nearly every day,TRUE,QID124931323_9,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.current_depression.1,GLAD,Current depression,0,None,TRUE,NA,NA,NA,NA
+phq.current_depression.1,GLAD,Current depression,1,Mild,TRUE,NA,NA,NA,NA
+phq.current_depression.1,GLAD,Current depression,2,Moderate,TRUE,NA,NA,NA,NA
+phq.current_depression.1,GLAD,Current depression,3,Moderately severe,TRUE,NA,NA,NA,NA
+phq.current_depression.1,GLAD,Current depression,4,Severe,TRUE,NA,NA,NA,NA
+phq.new.total.1,GLAD,NA,NA,NA,TRUE,NA,NA,NA,NA
+PHQ9.difficult_issues_made_carrying_daily_life.1.1,NA,How difficult have these issues made carrying out your daily life?,1,NA,NA,QID124931324,COVID_Baseline_PHQ9,Not difficult at all,TRUE
+PHQ9.difficult_issues_made_carrying_daily_life.1.1,NA,How difficult have these issues made carrying out your daily life?,2,NA,NA,QID124931324,COVID_Baseline_PHQ9,Somewhat difficult,TRUE
+PHQ9.difficult_issues_made_carrying_daily_life.1.1,NA,How difficult have these issues made carrying out your daily life?,3,NA,NA,QID124931324,COVID_Baseline_PHQ9,Very difficult,TRUE
+PHQ9.difficult_issues_made_carrying_daily_life.1.1,NA,How difficult have these issues made carrying out your daily life?,4,NA,NA,QID124931324,COVID_Baseline_PHQ9,Extremely difficult,TRUE
+PHQ9.before_the_pandemic.0.1,NA,How different are these feelings to how you felt before the pandemic?,1,NA,NA,QID124931325,COVID_Baseline_PHQ9,Much worse,TRUE
+PHQ9.before_the_pandemic.0.1,NA,How different are these feelings to how you felt before the pandemic?,2,NA,NA,QID124931325,COVID_Baseline_PHQ9,A little worse,TRUE
+PHQ9.before_the_pandemic.0.1,NA,How different are these feelings to how you felt before the pandemic?,3,NA,NA,QID124931325,COVID_Baseline_PHQ9,No different,TRUE
+PHQ9.before_the_pandemic.0.1,NA,How different are these feelings to how you felt before the pandemic?,4,NA,NA,QID124931325,COVID_Baseline_PHQ9,A little better,TRUE
+PHQ9.before_the_pandemic.0.1,NA,How different are these feelings to how you felt before the pandemic?,5,NA,NA,QID124931325,COVID_Baseline_PHQ9,Much better,TRUE
+phq.anhedonia.2,NA,Little interest or pleasure in doing things,0,NA,NA,QID124931326_1,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.anhedonia.2,NA,Little interest or pleasure in doing things,1,NA,NA,QID124931326_1,COVID_Baseline_PHQ9,Several days,TRUE
+phq.anhedonia.2,NA,Little interest or pleasure in doing things,2,NA,NA,QID124931326_1,COVID_Baseline_PHQ9,More than half of the days,TRUE
+phq.anhedonia.2,NA,Little interest or pleasure in doing things,3,NA,NA,QID124931326_1,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.depressed_mood.2,NA,"Feeling down, depressed or hopeless",0,NA,NA,QID124931326_2,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.depressed_mood.2,NA,"Feeling down, depressed or hopeless",1,NA,NA,QID124931326_2,COVID_Baseline_PHQ9,Several days,TRUE
+phq.depressed_mood.2,NA,"Feeling down, depressed or hopeless",2,NA,NA,QID124931326_2,COVID_Baseline_PHQ9,More than half of the days,TRUE
+phq.depressed_mood.2,NA,"Feeling down, depressed or hopeless",3,NA,NA,QID124931326_2,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.sleep_change.2,NA,"Trouble falling or staying asleep, or sleeping too much",0,NA,NA,QID124931326_3,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.sleep_change.2,NA,"Trouble falling or staying asleep, or sleeping too much",1,NA,NA,QID124931326_3,COVID_Baseline_PHQ9,Several days,TRUE
+phq.sleep_change.2,NA,"Trouble falling or staying asleep, or sleeping too much",2,NA,NA,QID124931326_3,COVID_Baseline_PHQ9,More than half of the days,TRUE
+phq.sleep_change.2,NA,"Trouble falling or staying asleep, or sleeping too much",3,NA,NA,QID124931326_3,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.little_energy.2,NA,Feeling tired or having little energy,0,NA,NA,QID124931326_4,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.little_energy.2,NA,Feeling tired or having little energy,1,NA,NA,QID124931326_4,COVID_Baseline_PHQ9,Several days,TRUE
+phq.little_energy.2,NA,Feeling tired or having little energy,2,NA,NA,QID124931326_4,COVID_Baseline_PHQ9,More than half of the days,TRUE
+phq.little_energy.2,NA,Feeling tired or having little energy,3,NA,NA,QID124931326_4,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.eating_problems.2,NA,Poor appetite or overeating,0,NA,NA,QID124931326_5,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.eating_problems.2,NA,Poor appetite or overeating,1,NA,NA,QID124931326_5,COVID_Baseline_PHQ9,Several days,TRUE
+phq.eating_problems.2,NA,Poor appetite or overeating,2,NA,NA,QID124931326_5,COVID_Baseline_PHQ9,More than half of the days,TRUE
+phq.eating_problems.2,NA,Poor appetite or overeating,3,NA,NA,QID124931326_5,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.worthlessness.2,NA,Feeling bad about yourself or that you are a failure or have let yourself or your family down,0,NA,NA,QID124931326_6,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.worthlessness.2,NA,Feeling bad about yourself or that you are a failure or have let yourself or your family down,1,NA,NA,QID124931326_6,COVID_Baseline_PHQ9,Several days,TRUE
+phq.worthlessness.2,NA,Feeling bad about yourself or that you are a failure or have let yourself or your family down,2,NA,NA,QID124931326_6,COVID_Baseline_PHQ9,More than half of the days,TRUE
+phq.worthlessness.2,NA,Feeling bad about yourself or that you are a failure or have let yourself or your family down,3,NA,NA,QID124931326_6,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.concentration_problems.2,NA,"Trouble concentrating on things, such as reading the newspaper or watching television",0,NA,NA,QID124931326_7,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.concentration_problems.2,NA,"Trouble concentrating on things, such as reading the newspaper or watching television",1,NA,NA,QID124931326_7,COVID_Baseline_PHQ9,Several days,TRUE
+phq.concentration_problems.2,NA,"Trouble concentrating on things, such as reading the newspaper or watching television",2,NA,NA,QID124931326_7,COVID_Baseline_PHQ9,More than half of the days,TRUE
+phq.concentration_problems.2,NA,"Trouble concentrating on things, such as reading the newspaper or watching television",3,NA,NA,QID124931326_7,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.motor_problems.2,NA,"Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",0,NA,NA,QID124931326_8,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.motor_problems.2,NA,"Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",1,NA,NA,QID124931326_8,COVID_Baseline_PHQ9,Several days,TRUE
+phq.motor_problems.2,NA,"Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",2,NA,NA,QID124931326_8,COVID_Baseline_PHQ9,More than half of the days,TRUE
+phq.motor_problems.2,NA,"Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",3,NA,NA,QID124931326_8,COVID_Baseline_PHQ9,Nearly every day,TRUE
+phq.suicide_ideation.2,NA,Thoughts that you would be better off dead or of hurting yourself in some way,0,NA,NA,QID124931326_9,COVID_Baseline_PHQ9,Not at all,TRUE
+phq.suicide_ideation.2,NA,Thoughts that you would be better off dead or of hurting yourself in some way,1,NA,NA,QID124931326_9,COVID_Baseline_PHQ9,Several days,TRUE
+phq.suicide_ideation.2,NA,Thoughts that you would be better off dead or of hurting yourself in some way,2,NA,NA,QID124931326_9,COVID_Baseline_PHQ9,More than half of the days,TRUE
+phq.suicide_ideation.2,NA,Thoughts that you would be better off dead or of hurting yourself in some way,3,NA,NA,QID124931326_9,COVID_Baseline_PHQ9,Nearly every day,TRUE

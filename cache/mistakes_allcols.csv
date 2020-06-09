@@ -1,0 +1,32 @@
+QuestionID,surveyBlock,easyVariableName,itemLabel,Wave,questionText,originalLevel,recodeLevel,valueLabel,validationForced,validationType,questionType,qualtricsName
+QID124931243,COVID_Baseline_Behaviours,Behaviours.main_motivation_taking.1,What was your main motivation for taking these actions? (tick all that apply),1,What was your main motivation for taking these actions? (tick all that apply),1,1,To protect myself,False,nan,Categorical,Q5
+QID124931243,COVID_Baseline_Behaviours,Behaviours.main_motivation_taking.1,What was your main motivation for taking these actions? (tick all that apply),1,What was your main motivation for taking these actions? (tick all that apply),2,2,To protect my family,False,nan,Categorical,Q5
+QID124931243,COVID_Baseline_Behaviours,Behaviours.main_motivation_taking.1,What was your main motivation for taking these actions? (tick all that apply),1,What was your main motivation for taking these actions? (tick all that apply),3,3,To protect others in society as a whole,False,nan,Categorical,Q5
+QID124931243,COVID_Baseline_Behaviours,Behaviours.main_motivation_taking.1,What was your main motivation for taking these actions? (tick all that apply),1,What was your main motivation for taking these actions? (tick all that apply),4,4,To protect the vulnerable,False,nan,Categorical,Q5
+QID124931243,COVID_Baseline_Behaviours,Behaviours.main_motivation_taking.1,What was your main motivation for taking these actions? (tick all that apply),1,What was your main motivation for taking these actions? (tick all that apply),5,-88,Don't know,False,nan,Categorical,Q5
+QID124931243,COVID_Baseline_Behaviours,Behaviours.main_motivation_taking.1,What was your main motivation for taking these actions? (tick all that apply),1,What was your main motivation for taking these actions? (tick all that apply),6,6,Other,False,nan,Categorical,Q5
+QID124946999,COVID_Neuro_MIDAS,MIDAS.past_month_days.1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",1,1,Did you miss work or school because of your headaches,False,nan,Continuous,Q3
+QID124946999,COVID_Neuro_MIDAS,MIDAS.past_month_days.1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",2,2,Was your productivity at work or school reduced by half or more because of your headaches  (Do not include days you counted in question 1 where you missed work or school),False,nan,Continuous,Q3
+QID124946999,COVID_Neuro_MIDAS,MIDAS.past_month_days.1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",96,96,"Did you not do household work (such as housework, home repairs and maintenance, shopping, caring for children and relatives) because of your headaches",False,nan,Continuous,Q3
+QID124946999,COVID_Neuro_MIDAS,MIDAS.past_month_days.1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",3,3,Was your productivity in household work reduced by half or more because of your headaches,False,nan,Continuous,Q3
+QID124946999,COVID_Neuro_MIDAS,MIDAS.past_month_days.1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",1,"On how many days in the past month:
+
+To answer this section, please click firmly on the bar for each question and drag it to the point on the scale line that best fits your experience.",4,4,"Did you miss family, social or leisure activities because of your headaches",False,nan,Continuous,Q3
