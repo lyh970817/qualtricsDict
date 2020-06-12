@@ -16,19 +16,27 @@ is_onetoone <- function(cols) {
   !any(map_dbl(which_not_onetoone(cols), nrow) > 0)
 }
 
-match_name_recode <- function(n, match_name) {
-  if (length(n) == 1) {
-    return(NA)
-  }
-  if (!is.null(match_name)) {
-    value <- seq(max(match_name))
-    value[!value %in% match_name] <-
-      sort(value[!value %in% names(match_name)])
-    value[match_name] <- as.numeric(names(match_name))
-    return(value[n])
-  } else {
-    return(n)
-  }
-}
+# match_name_recode <- function(n, match_name) {
+#   if (length(n) == 1) {
+#     return(NA)
+#   }
+#   if (!is.null(match_name)) {
+#     value <- seq(max(match_name))
+#     value[!value %in% match_name] <-
+#       sort(value[!value %in% names(match_name)])
+#     value[match_name] <- as.numeric(names(match_name))
+#     return(value[n])
+#   } else {
+#     return(n)
+#   }
+# }
 
-# match_name_recode(c(1, 2, 3), c("1" = 2))
+match_name_recode <- function(names) {
+  if (length(names) > 1) {
+    recode <- seq_along(names) - 1
+    recode[1] <- NA
+  } else {
+    recode <- NA
+  }
+  return(recode)
+}
