@@ -1,5 +1,5 @@
 dict_generate <- function(newname = "easyVariableName",
-                          survey_name,
+                          study_name,
                           split_by_block = FALSE,
                           survey_start = NULL,
                           survey_end = NULL,
@@ -11,13 +11,12 @@ dict_generate <- function(newname = "easyVariableName",
                           surveyID = NULL,
                           datacenter = NULL) {
   dict <- json %>% select(
+    QuestionID,
     .data[[newname]], surveyBlock,
-    itemLabel, recodeLevel, valueLabel
+    itemLabel, recodeLevel, valueLabel,
+    questionType
   )
 
-  if (qid) {
-    dict <- bind_cols(json["QuestionID"], dict)
-  }
 
   attr(dict, "survey_name") <- survey_name
 
@@ -35,11 +34,21 @@ dict_generate <- function(newname = "easyVariableName",
         -contains(attr(reference_dict, "survey_name")),
         -.data[[survey_name]]
       ) %>%
-      setNames(c(newname, "itemLabel", "recodeLevel", "QuestionID", "surveyBlock", "valueLabel")) %>%
+      setNames(c(
+        newname, "itemLabel", "recodeLevel",
+        "QuestionID", "surveyBlock",
+        "valueLabel", "questionType"
+      )) %>%
       select(
+        QuestionID,
         .data[[newname]], surveyBlock,
-        itemLabel, recodeLevel, valueLabel
+        itemLabel, recodeLevel, valueLabel,
+        questionType
       )
+  }
+
+  if (!qid) {
+    dict <- select(dict, -QuestionID)
   }
 
   if (split_by_block) {
@@ -52,19 +61,29 @@ dict_generate <- function(newname = "easyVariableName",
 dict_compare <- function(dict, reference_dict) {
   qtr <- reference_dict[["itemLabel"]]
   qt <- dict[["itemLabel"]]
-  qt[qt %in% qtr] <- NA
+  qt_a <- ifelse(qt %in% qtr, NA, qt)
 
-  amatch_is <- amatch(qt, qtr, maxDist = 20)
-  qt_is <- which(!is.na(amatch_is))
-  qtr_is <- discard(amatch_is, is.na)
+  match_is <- match(qt, qtr)
+  amatch_is <- amatch(qt_a, qtr, maxDist = 20)
+
+  qt_ais <- get_match(amatch_is)[[1]]
+  qtr_ais <- get_match(amatch_is)[[2]]
+
+  qt_is <- get_match(match_is)[[1]]
+  qtr_is <- get_match(match_is)[[2]]
 
   return(
     tibble(
-      name = dict[["easyVariableName"]][qt_is],
-      itemLabel = qt[qt_is],
-      name_reference = reference_dict[["easyVariableName"]][qtr_is],
-      itemLabel_reference = qtr[qtr_is]
+      name = dict[["easyVariableName"]][c(qt_ais, qt_is)],
+      itemLabel = qt[c(qt_ais, qt_is)],
+      name_reference = reference_dict[["easyVariableName"]][c(qtr_ais, qtr_is)],
+      itemLabel_reference = qtr[c(qtr_ais, qtr_is)],
+      identical = c(
+        rep(FALSE, times = length(qt_ais)),
+        rep(TRUE, times = length(qt_is))
+      )
     ) %>%
+      # Do we still need this?
       .[!duplicated(.), ] %>%
       na.omit()
   )
@@ -78,18 +97,9 @@ dict_merge <- function(dict,
     stop("Dictionaries to be merged are from the same questionnaire.")
   }
 
-  if (any(duplicated(dict_diff[["name"]])) ||
-    any(duplicated(dict_diff["name_reference"]))) {
+  if (any(duplicated(dict_diff[["name"]]))) {
     stop("Non-unique mapping in dict_diff.")
   }
-
-  qt <- dict[["itemLabel"]]
-  qtr <- reference_dict[["itemLabel"]]
-
-  match_is <- match(qt, qtr)
-  qt_is <- which(!is.na(match_is))
-  qtr_is <- discard(match_is, is.na)
-  dict$easyVariableName[qt_is] <- reference_dict$easyVariableName[qtr_is]
 
   if (is.null(dict_diff)) {
     message("Consider using 'dict_compare' to track potential matching items")
@@ -106,14 +116,14 @@ dict_merge <- function(dict,
         easyVariableName = recode(
           easyVariableName,
           !!!setNames(
-            dict_diff[["name_reference"]],
+            make.unique(dict_diff[["name_reference"]]),
             dict_diff[["name"]]
           )
         )
       )
   }
 
-  # If there is no survey indicator, add it
+  # If there is no survey indicator variabe, add it
   if (!any(map_lgl(reference_dict, is.logical))) {
     reference_dict[attr(reference_dict, "survey_name")] <- TRUE
   }
@@ -121,20 +131,30 @@ dict_merge <- function(dict,
   survey_name <- attr(dict, "survey_name")
   survey_name_ref <- attr(reference_dict, "survey_name")
 
-  return(
-    full_join(reference_dict, bind_cols(
-      dict,
-      setNames(tibble(TRUE), survey_name)
-    ),
-    by = c("easyVariableName", "itemLabel", "recodeLevel"),
-    suffix = c(
-      paste0("_", survey_name_ref),
-      paste0("_", survey_name)
-    )
-    ) %>%
-      # Discard the duplicated generated rows
-      select(easyVariableName, everything())
+  merged <- full_join(reference_dict, bind_cols(
+    dict,
+    setNames(tibble(TRUE), survey_name)
+  ),
+  by = c("easyVariableName", "itemLabel", "recodeLevel"),
+  suffix = c(
+    paste0("_", survey_name_ref),
+    paste0("_", survey_name)
   )
+  ) %>%
+    # Discard the duplicated generated rows
+    select(easyVariableName, everything())
+
+  duplicated_ref_names <- dict_diff$name_reference %>% subset(duplicated(.))
+
+  to_fill <- setdiff(
+    make.unique(dict_diff[["name_reference"]]),
+    unique(dict_diff[["name_reference"]])
+  )
+
+  merged[merged$easyVariableName %in% to_fill, 2:6] <-
+    merged[merged$easyVariableName %in% duplicated_ref_names, 2:6]
+
+  return(merged)
 }
 
 

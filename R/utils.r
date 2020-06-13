@@ -40,3 +40,10 @@ match_name_recode <- function(names) {
   }
   return(recode)
 }
+
+get_match <- function(matches) {
+  list(
+    which(!is.na(matches)),
+    discard(matches, is.na)
+  )
+}

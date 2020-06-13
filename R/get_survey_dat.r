@@ -1,14 +1,18 @@
 get_survey_dat <- function(newname = "easyVariableName",
                            split_by_block = FALSE,
                            keys = NULL,
-                           survey_start = NULL,
-                           survey_end = NULL,
+                           # survey_start = NULL,
+                           # survey_end = NULL,
                            numeric_to_pos = FALSE,
-                           json,
+                           # numeric_to_pos = FALSE (exclude columns),
+                           # If no exclude warning
+                           # json,
+                           # Just use dict
                            dict,
-                           api_key,
-                           surveyID,
-                           datacenter,
+                           # api_key,
+                           # surveyID,
+                           # datacenter,
+                           # Use stikcy for attributes
                            ...) {
 
   # Change api_key and survey_id for consistency
@@ -89,55 +93,48 @@ get_survey_dat <- function(newname = "easyVariableName",
     skip_qids <- unique(mistake_jsons[["qid"]])
 
     survey_item_recode <- function(var, item_json) {
-      attr(var, "label") <- item_json[["text"]]
-
-      # if (is.na(item_json[["recodeLevel"]]) &&
-      #   item_json[["questionType"]] == "Text entry") {
-      #   return(var)
-      # }
-
-      if (is.na(item_json[["recodeLevel"]])) {
-        return(var)
-      }
-
-      # if (is.na(item_json[["recodeLevel"]]) &&
-      #   # No recode and not text entry, is numerc
-      #   item_json[["questionType"]] != "Text entry") {
-      #   if (numeric_to_pos) {
-      #     return(abs(as.numeric(var)))
-      #   } else {
-      #     return(as.numeric(var))
-      #   }
-      # }
-
-      # If only one row in json it's multiple options
-      if (nrow(item_json) == 1) {
-        yes <- item_json[["valueLabel"]]
-        levels <- 1
-        labels <- yes
-        if (exists("unanswer_recode_multi")) {
-          levels <- c(levels, unanswer_recode_multi)
-          labels <- c(labels, paste("No", yes))
+      if (is.na(item_json[["recodeLevel"]]) &&
+        # No recode and not text entry, is numerc
+        item_json[["questionType"]] != "Text entry") {
+        if (numeric_to_pos) {
+          var <- abs(as.numeric(var))
+        } else {
+          var <- as.numeric(var)
         }
       }
 
-      # If multiple rows it's ordinal
-      if (nrow(item_json) > 1) {
-        levels <- item_json[["recodeLevel"]]
-        labels <- item_json[["valueLabel"]]
+      if (!is.na(item_json[["recodeLevel"]])) {
+
+        # If only one row in json it's multiple options
+        if (nrow(item_json) == 1) {
+          yes <- item_json[["valueLabel"]]
+          levels <- 1
+          labels <- yes
+          if (exists("unanswer_recode_multi")) {
+            levels <- c(levels, unanswer_recode_multi)
+            labels <- c(labels, paste("No", yes))
+          }
+        }
+
+        # If multiple rows it's ordinal
+        if (nrow(item_json) > 1) {
+          levels <- item_json[["recodeLevel"]]
+          labels <- item_json[["valueLabel"]]
+        }
+
+        if (exists("unanswer_recode")) {
+          levels <- c(levels, unanswer_recode)
+          labels <- c(labels, "Seen but not answered")
+        }
       }
 
-      if (exists("unanswer_recode")) {
-        levels <- c(levels, unanswer_recode)
-        labels <- c(labels, "Seen but not answered")
-      }
+      var <- factor(var, levels = levels, labels = labels)
 
-      return(factor(var,
-        levels = levels,
-        labels = labels
-      ))
+      attr(var, "label") <- item_json[["questionText"]]
+      attr(var, "names") <- NULL
+
+      return(var)
     }
-
 
     dat <- dat[names(newnames)] %>%
       modify2(., split_jsons, survey_item_recode) %>%
@@ -146,7 +143,6 @@ get_survey_dat <- function(newname = "easyVariableName",
         .,
         setNames(dat[names(newnames)], paste(names(newnames), "numeric", sep = "_"))
       )
-
 
     unique_pairs <- split_jsons %>%
       map(select, valueLabel, recodeLevel) %>%
@@ -159,6 +155,7 @@ get_survey_dat <- function(newname = "easyVariableName",
     if (length(skip_qids) > 0) {
       attr(dat, "mistakes") <- mistake_jsons
     }
+
     return(dat)
   }
 
@@ -177,8 +174,8 @@ get_survey_dat <- function(newname = "easyVariableName",
         .x
       )
     ))
-    # json <- block_jsons[["COVID_Baseline_Demographics"]]
-    map(block_jsons, survey_recode, dat = survey)
+
+    return(map(block_jsons, survey_recode, dat = survey))
   } else {
     return(survey_recode(json, dat = survey))
   }
