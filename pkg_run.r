@@ -44,6 +44,7 @@ subdict_generate <- function(json, block) {
 
 url <- "https://docs.google.com/spreadsheets/d/1IKrEwkkH52Yxf-Ltfik46YzN8n5EaNIP_LRc-Eung8A/edit?usp=sharing"
 json <- read_sheet(url)
+json <- read_csv("./cache/coping_dict.csv")
 
 unique(json$surveyBlock)
 
@@ -53,16 +54,45 @@ phq_dict_c <- subdict_generate(json, "COVID_Baseline_PHQ9")
 phq_diff <- dict_compare(phq_dict_c, phq)
 # check without dict diff
 t <- dict_merge(phq_dict_c, phq, phq_diff)
-print(t, n = 200)
 
+print(reference_dict, n = 200)
+a <- t %>% select(-itemLabel, -n_levels)
 gad <- GLAD_sheet("GAD")[[1]]
 gad_dict_c <- subdict_generate(json, "COVID_Baseline_GAD7")
 gad_dict <- json_recode(gad)
 gad_diff <- dict_compare(gad_dict_c, gad_dict)
+t <- dict_merge(gad_dict_c, gad_dict, gad_diff)
 # Check valueLabel matching if yes remove
 # valueLabel should be the same/recodeLevel can be different
 ocir <- subdict_generate(json, "COVID_Baseline_OCI-R")
 
+pcl <- GLAD_sheet("PCL")[[1]]
+pcl_dict <- json_recode(pcl)
+pcl_dict_c <- subdict_generate(json, "COVID_Measures_PCL6")
+pcl_dict_new <- readRDS("~/pcl.rds")
+pcl_dict_new$QuestionID
+pcl_dict_new <- full_join(pcl_dict_c, pcl_dict_new, by = c(recodeLevel = "level", itemLabel = "item", valueLabel = "label")) %>%
+  select(-QuestionID, -type, -question, -block, -selector, -sub_selector, QuestionID = new_qid)
+pcl_dict_new <- pcl_dict_new %>%
+  mutate(itemLabel = ifelse(grepl("related_pandemic", easyVariableName),
+    paste(itemLabel, "(related to pandemic?)"),
+    itemLabel
+  ))
+
+pcl_diff <- dict_compare(pcl_dict_new, pcl_dict) %>%
+  filter(!grepl("related_pandemic", name))
+
+dict <- dict_generate(
+  json = pcl_dict_new,
+  survey_name = "coping",
+  reference_dict = pcl_dict,
+  dict_diff = pcl_diff,
+  qid = TRUE
+)
+
+t <- dict_merge(pcl_dict_new, pcl_dict, pcl_diff)
+print(t, n = 100)
+pcl_diff$name
 dict <- dict_generate(
   json = filter(
     json,
@@ -89,11 +119,13 @@ json <- json %>%
 api_key <- "kqBI3SOA54Ik6r1QFnYhq6W0oYDPyhxp9q5wwPtX"
 surveyID <- "SV_0DrSSOISyMOqN5r"
 dem <- json %>% filter(surveyBlock == "COVID_Baseline_Demographics")
+dict <- json %>% filter(surveyBlock == "COVID_Health_MHQ")
+
 unique(json$surveyBlock)
 
-phq <- get_survey_dat(
+mhd <- get_survey_dat(
   newname = "easyVariableName",
-  json = dict, api_key = api_key,
+  dict = dict, api_key = api_key,
   surveyID = surveyID,
   datacenter = "eu",
   # limit = 100,
@@ -101,20 +133,33 @@ phq <- get_survey_dat(
   unanswer_recode_multi = 0
 )
 
-dem <- get_survey_dat(
+a <- column_map(surveyID)
+print(a, n = 200)
+c_names <- str_split(a$choice, "\\.") %>%
+  map_chr(~ paste(.x[1], .x[3], sep = "_"))
+c_names <- ifelse(is.na(a[["choice"]]), a[["qid"]], c_names)
+names(c_names) <- NULL
+c_names[!c_names %in% colnames(survey)]
+colnames(survey)[!colnames(survey) %in% c_names]
+
+pcl <- get_survey_dat(
   newname = "easyVariableName",
-  json = dem, api_key = api_key,
+  dict = dict, api_key = api_key,
   surveyID = surveyID,
   datacenter = "eu",
   # limit = 100,
   unanswer_recode = -99,
   unanswer_recode_multi = 0
 )
+
+dict$QuestionID
+
 map(dem, typeof)
 dat <- check_names(json, newname = "easyVariableName")[[2]]
 dat %>% filter(grepl("PCL", easyVariableName))
 gad <- readRDS("./cache/gad.rds")
 saveRDS(gad, "./cache/gad.rds")
+saveRDS(pcl, "./cache/pcl.rds")
 saveRDS(ocir, "./cache/ocir.rds")
 saveRDS(phq, "./cache/phq.rds")
 saveRDS(dem, "./cache/dem.rds")

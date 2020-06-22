@@ -60,8 +60,8 @@ googjson = "/Users/kirstin/Dropbox/SGDP/RAMP/data/GoogleApi/creds.json"
 # data wave
 wave = 1
 '''fetch the meta data for questionnaire from qualtrics'''
-center = "eu"
-survey_id = "SV_4PyAHbAxpdbyacl"
+# center = "eu"
+# survey_id = "SV_4PyAHbAxpdbyacl"
 
 baseUrl = "https://{0}.qualtrics.com/API/v3/surveys/{1}".format(
     center, survey_id)
@@ -203,6 +203,9 @@ for qid in ramp_dict['result']['questions'].keys():
     choicerow = {}
 
     ## SBS are the only data metadata eith columns, so this first section unravels these
+
+    # if qid == "QID124931342":
+    #     breakpoint()
 
     if 'subQuestions' in ramp_dict['result']['questions'][qid].keys():
 
@@ -376,8 +379,10 @@ for qid in ramp_dict['result']['questions'].keys():
 
         choicesdf = choicesdf.append(choicerow, ignore_index=True)
 
-choicesdf.loc[choicesdf.qid == "QID124964827"]
+choicesdf.loc[choicesdf.qid == "QID124931342"]
+
 choicesdf.columns
+
 # #### # Create remaining data dictionary components
 #
 # Create pandas dataframed with the remaining metadata to flesh out our data dictionary.
@@ -619,6 +624,7 @@ for row in range(0, DataDictionary.shape[0]):
 
     elif DataDictionary['subQuestion'][row] == "yes":
 
+        breakpoint()
         DataDictionary['qid'][row] = rename_qid(
             DataDictionary['qid'][row], "sub", DataDictionary['choices'][row],
             DataDictionary['subQuestion'][row])

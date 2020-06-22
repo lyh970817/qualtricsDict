@@ -3,15 +3,20 @@ get_survey_dat <- function(newname = "easyVariableName",
                            keys = NULL,
                            # survey_start = NULL,
                            # survey_end = NULL,
+                           survey_start = NULL,
+                           survey_end = NULL,
                            numeric_to_pos = FALSE,
                            # numeric_to_pos = FALSE (exclude columns),
                            # If no exclude warning
-                           # json,
+                           # dict,
                            # Just use dict
                            dict,
                            # api_key,
                            # surveyID,
                            # datacenter,
+                           api_key,
+                           surveyID,
+                           datacenter,
                            # Use stikcy for attributes
                            ...) {
 
@@ -35,43 +40,51 @@ get_survey_dat <- function(newname = "easyVariableName",
   # save(survey, file = "./cache/survey.RData")
   load(file = "./cache/survey.RData")
 
-  qid_pattern <- ':\\"(.+?)\\"'
+  qid_pattern <- '\\{"ImportId":"(.+)".+'
+  qid_pattern_choice <- '\\{"ImportId":"(.+)","choiceId":"([-0-9]+)"'
+
+  grep(qid_pattern, colnames(survey), v = T)
   qid_rename <- str_match(colnames(survey), qid_pattern)[, 2]
+  qid_rename_choice <- str_match(colnames(survey), qid_pattern_choice)
+  qid_choices <- paste(qid_rename_choice[, 2], qid_rename_choice[, 3], sep = "_")
+  qid_rename[grep("choiceId", qid_rename)] <- qid_choices[grep("choiceId", qid_rename)]
+
   names(survey) <- qid_rename
 
   survey_start <- if (!is.null(survey_start)) {
-    grep(survey_start, json[["qualtricsName"]])[1]
+    grep(survey_start, dict[["qualtricsName"]])[1]
   } else {
     1
   }
 
   survey_end <- if (!is.null(survey_end)) {
-    rev(grep(survey_end, json[["qualtricsName"]]))[1]
+    rev(grep(survey_end, dict[["qualtricsName"]]))[1]
   } else {
-    nrow(json)
+    nrow(dict)
   }
 
-  json <- json[survey_start:survey_end, ]
+  dict <- dict[survey_start:survey_end, ]
 
   if (length(newname) > 1) {
-    uni_qids <- unique(json$QuestionID)
+    uni_qids <- unique(dict$QuestionID)
 
     if (length(newname) != length(uni_qids)) {
-      stop("Length of new names don't match rows in json")
+      stop("Length of new names don't match rows in dict")
     }
 
     othernames <- newname %>%
       setNames(uni_qids) %>%
-      recode(json$QuestionID, !!!.)
+      recode(dict$QuestionID, !!!.)
 
-    json <- bind_cols(tibble(othername = othernames))
+    dict <- bind_cols(tibble(othername = othernames))
     newname <- "othername"
   }
 
-  # survey_recode(json, survey)
+  # survey_recode(dict, survey)
 
-  survey_recode <- function(json, dat) {
-    non_unique_names <- check_names(json, newname)
+  browser()
+  survey_recode <- function(dict, dat) {
+    non_unique_names <- check_names(dict, newname)
     non_unique_names[[2]][[1]]
 
     # write_csv(x = non_unique_names[[2]], path = "./duplicated_names.csv")
@@ -80,7 +93,7 @@ get_survey_dat <- function(newname = "easyVariableName",
       stop("There are non-unique name mappings.")
     }
 
-    qids <- json[c("QuestionID", newname)] %>%
+    qids <- dict[c("QuestionID", newname)] %>%
       subset(!duplicated(.))
 
     dat_cols <- c("Login ID", keys, "startDate", "endDate", unique(qids[["QuestionID"]]))
@@ -88,14 +101,14 @@ get_survey_dat <- function(newname = "easyVariableName",
     newnames <- setNames(qids[["QuestionID"]], qids[[newname]])
     dat <- rename(dat[dat_cols], !!!newnames)
 
-    split_jsons <- split(json, factor(json$QuestionID))
-    mistake_jsons <- check_jsons(split_jsons)
-    skip_qids <- unique(mistake_jsons[["qid"]])
+    split_dict <- split(dict, factor(dict$QuestionID))
+    mistake_dict <- check_jsons(split_dict)
+    skip_qids <- unique(mistake_dict[["qid"]])
 
-    survey_item_recode <- function(var, item_json) {
-      if (is.na(item_json[["recodeLevel"]]) &&
+    survey_item_recode <- function(var, item_dict) {
+      if (is.na(item_dict[["recodeLevel"]]) &&
         # No recode and not text entry, is numerc
-        item_json[["questionType"]] != "Text entry") {
+        item_dict[["questionType"]] != "Text entry") {
         if (numeric_to_pos) {
           var <- abs(as.numeric(var))
         } else {
@@ -103,11 +116,11 @@ get_survey_dat <- function(newname = "easyVariableName",
         }
       }
 
-      if (!is.na(item_json[["recodeLevel"]])) {
+      if (!is.na(item_dict[["recodeLevel"]])) {
 
-        # If only one row in json it's multiple options
-        if (nrow(item_json) == 1) {
-          yes <- item_json[["valueLabel"]]
+        # If only one row in dict it's multiple options
+        if (nrow(item_dict) == 1) {
+          yes <- item_dict[["valueLabel"]]
           levels <- 1
           labels <- yes
           if (exists("unanswer_recode_multi")) {
@@ -117,9 +130,9 @@ get_survey_dat <- function(newname = "easyVariableName",
         }
 
         # If multiple rows it's ordinal
-        if (nrow(item_json) > 1) {
-          levels <- item_json[["recodeLevel"]]
-          labels <- item_json[["valueLabel"]]
+        if (nrow(item_dict) > 1) {
+          levels <- item_dict[["recodeLevel"]]
+          labels <- item_dict[["valueLabel"]]
         }
 
         if (exists("unanswer_recode")) {
@@ -130,21 +143,21 @@ get_survey_dat <- function(newname = "easyVariableName",
 
       var <- factor(var, levels = levels, labels = labels)
 
-      attr(var, "label") <- item_json[["questionText"]]
+      attr(var, "label") <- item_dict[["questionText"]]
       attr(var, "names") <- NULL
 
       return(var)
     }
 
     dat <- dat[names(newnames)] %>%
-      modify2(., split_jsons, survey_item_recode) %>%
+      modify2(., split_dict, survey_item_recode) %>%
       bind_cols(
         select(dat, -names(newnames)),
         .,
         setNames(dat[names(newnames)], paste(names(newnames), "numeric", sep = "_"))
       )
 
-    unique_pairs <- split_jsons %>%
+    unique_pairs <- split_dict %>%
       map(select, valueLabel, recodeLevel) %>%
       enframe(value = "pair") %>%
       group_by(pair) %>%
@@ -153,30 +166,30 @@ get_survey_dat <- function(newname = "easyVariableName",
     attr(dat, "unique_pairs") <- unique_pairs
 
     if (length(skip_qids) > 0) {
-      attr(dat, "mistakes") <- mistake_jsons
+      attr(dat, "mistakes") <- mistake_dict
     }
 
     return(dat)
   }
 
   if (split_by_block == TRUE) {
-    keys <- json %>%
+    keys <- dict %>%
       filter(questionName %in% keys) %>%
       select(qid) %>%
       pull() %>%
       unique()
 
-    comm_vars <- filter(json, questionName %in% keys)
-    block_jsons <- suppressWarnings(map(
-      split(json, json$block),
+    comm_vars <- filter(dict, questionName %in% keys)
+    block_dict <- suppressWarnings(map(
+      split(dict, dict$block),
       ~ bind_rows(
         comm_vars[-match(comm_cols$questionName, .x$questionName)],
         .x
       )
     ))
 
-    return(map(block_jsons, survey_recode, dat = survey))
+    return(map(block_dict, survey_recode, dat = survey))
   } else {
-    return(survey_recode(json, dat = survey))
+    return(survey_recode(dict, dat = survey))
   }
 }
