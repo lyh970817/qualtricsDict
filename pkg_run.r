@@ -121,7 +121,6 @@ surveyID <- "SV_0DrSSOISyMOqN5r"
 dem <- json %>% filter(surveyBlock == "COVID_Baseline_Demographics")
 dict <- json %>% filter(surveyBlock == "COVID_Health_MHQ")
 
-unique(json$surveyBlock)
 
 mhd <- get_survey_dat(
   newname = "easyVariableName",
@@ -158,7 +157,7 @@ map(dem, typeof)
 dat <- check_names(json, newname = "easyVariableName")[[2]]
 dat %>% filter(grepl("PCL", easyVariableName))
 gad <- readRDS("./cache/gad.rds")
-saveRDS(gad, "./cache/gad.rds")
+saveRDS(mhd, "./cache/mhd.rds")
 saveRDS(pcl, "./cache/pcl.rds")
 saveRDS(ocir, "./cache/ocir.rds")
 saveRDS(phq, "./cache/phq.rds")

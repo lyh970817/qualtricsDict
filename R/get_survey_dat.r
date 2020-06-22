@@ -40,14 +40,16 @@ get_survey_dat <- function(newname = "easyVariableName",
   # save(survey, file = "./cache/survey.RData")
   load(file = "./cache/survey.RData")
 
-  qid_pattern <- '\\{"ImportId":"(.+)".+'
+  # Question mark for non-greedy match
+  qid_pattern <- '\\{"ImportId":"(.+?)".+'
   qid_pattern_choice <- '\\{"ImportId":"(.+)","choiceId":"([-0-9]+)"'
 
-  grep(qid_pattern, colnames(survey), v = T)
   qid_rename <- str_match(colnames(survey), qid_pattern)[, 2]
   qid_rename_choice <- str_match(colnames(survey), qid_pattern_choice)
-  qid_choices <- paste(qid_rename_choice[, 2], qid_rename_choice[, 3], sep = "_")
-  qid_rename[grep("choiceId", qid_rename)] <- qid_choices[grep("choiceId", qid_rename)]
+  qid_rename <- ifelse(is.na(qid_rename_choice[, 1]),
+    qid_rename,
+    paste(qid_rename_choice[, 2], qid_rename_choice[, 3], sep = "_")
+  )
 
   names(survey) <- qid_rename
 
@@ -80,9 +82,6 @@ get_survey_dat <- function(newname = "easyVariableName",
     newname <- "othername"
   }
 
-  # survey_recode(dict, survey)
-
-  browser()
   survey_recode <- function(dict, dat) {
     non_unique_names <- check_names(dict, newname)
     non_unique_names[[2]][[1]]
