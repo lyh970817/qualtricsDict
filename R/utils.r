@@ -16,34 +16,44 @@ is_onetoone <- function(cols) {
   !any(map_dbl(which_not_onetoone(cols), nrow) > 0)
 }
 
-# match_name_recode <- function(n, match_name) {
-#   if (length(n) == 1) {
-#     return(NA)
-#   }
-#   if (!is.null(match_name)) {
-#     value <- seq(max(match_name))
-#     value[!value %in% match_name] <-
-#       sort(value[!value %in% names(match_name)])
-#     value[match_name] <- as.numeric(names(match_name))
-#     return(value[n])
-#   } else {
-#     return(n)
-#   }
-# }
-
-match_name_recode <- function(names) {
-  if (length(names) > 1) {
-    recode <- seq_along(names) - 1
-    recode[1] <- NA
-  } else {
-    recode <- NA
-  }
-  return(recode)
-}
 
 get_match <- function(matches) {
   list(
     which(!is.na(matches)),
     discard(matches, is.na)
   )
+}
+
+null_na <- function(x) {
+  if (is.null(x)) {
+    NA
+  } else {
+    x
+  }
+}
+
+remove_format <- function(dat) {
+  mutate_if(
+    dat, is.character,
+    ~ str_remove_all(., "(<[^>]+>|\\n)+") %>%
+      str_remove_all("Selected Choice - ") %>%
+      str_remove_all("\\(.*\\)") %>%
+      str_squish()
+  )
+}
+
+survey_rename <- function(survey) {
+
+  # Question mark for non-greedy match
+  qid_pattern <- '\\{"ImportId":"(.+?)".+'
+  qid_pattern_choice <- '\\{"ImportId":"(.+)","choiceId":"([-0-9]+)"'
+
+  qid_rename <- str_match(colnames(survey), qid_pattern)[, 2]
+  qid_rename_choice <- str_match(colnames(survey), qid_pattern_choice)
+  qid_rename <- ifelse(is.na(qid_rename_choice[, 1]),
+    qid_rename,
+    paste(qid_rename_choice[, 2], qid_rename_choice[, 3], sep = "_")
+  )
+
+  return(setNames(survey, qid_rename))
 }

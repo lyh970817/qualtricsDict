@@ -1,15 +1,9 @@
-get_survey_dat <- function(newname = "easyVariableName",
+get_survey_data <- function(newname = "easyVariableName",
                            split_by_block = FALSE,
                            keys = NULL,
-                           # survey_start = NULL,
-                           # survey_end = NULL,
-                           survey_start = NULL,
-                           survey_end = NULL,
                            numeric_to_pos = FALSE,
                            # numeric_to_pos = FALSE (exclude columns),
                            # If no exclude warning
-                           # dict,
-                           # Just use dict
                            dict,
                            # api_key,
                            # surveyID,
@@ -38,34 +32,11 @@ get_survey_dat <- function(newname = "easyVariableName",
 
   # survey <- do.call(fetch_survey, args)
   # save(survey, file = "./cache/survey.RData")
-  load(file = "./cache/survey.RData")
+  load(file = "../cache/survey.RData")
 
-  # Question mark for non-greedy match
-  qid_pattern <- '\\{"ImportId":"(.+?)".+'
-  qid_pattern_choice <- '\\{"ImportId":"(.+)","choiceId":"([-0-9]+)"'
+  survey <- survey_rename(survey)
 
-  qid_rename <- str_match(colnames(survey), qid_pattern)[, 2]
-  qid_rename_choice <- str_match(colnames(survey), qid_pattern_choice)
-  qid_rename <- ifelse(is.na(qid_rename_choice[, 1]),
-    qid_rename,
-    paste(qid_rename_choice[, 2], qid_rename_choice[, 3], sep = "_")
-  )
-
-  names(survey) <- qid_rename
-
-  survey_start <- if (!is.null(survey_start)) {
-    grep(survey_start, dict[["qualtricsName"]])[1]
-  } else {
-    1
-  }
-
-  survey_end <- if (!is.null(survey_end)) {
-    rev(grep(survey_end, dict[["qualtricsName"]]))[1]
-  } else {
-    nrow(dict)
-  }
-
-  dict <- dict[survey_start:survey_end, ]
+  # dict <- dict[survey_start:survey_end, ]
 
   if (length(newname) > 1) {
     uni_qids <- unique(dict$QuestionID)
@@ -149,13 +120,17 @@ get_survey_dat <- function(newname = "easyVariableName",
     }
 
     dat <- dat[names(newnames)] %>%
-      modify2(., split_dict, survey_item_recode) %>%
+      # modify2(., split_dict, survey_item_recode) %>%
+      modify2(split_dict, survey_item_recode) %>%
       bind_cols(
+        # The 'key' columns
+        # If key in dat, would it be lost?
         select(dat, -names(newnames)),
         .,
         setNames(dat[names(newnames)], paste(names(newnames), "numeric", sep = "_"))
       )
 
+    # This should be in the dictionary
     unique_pairs <- split_dict %>%
       map(select, valueLabel, recodeLevel) %>%
       enframe(value = "pair") %>%
@@ -164,10 +139,11 @@ get_survey_dat <- function(newname = "easyVariableName",
 
     attr(dat, "unique_pairs") <- unique_pairs
 
+    # This should also be in the dictionary?
+    # How to allow for skipping?
     if (length(skip_qids) > 0) {
       attr(dat, "mistakes") <- mistake_dict
     }
-
     return(dat)
   }
 
