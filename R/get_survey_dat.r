@@ -1,18 +1,18 @@
 get_survey_data <- function(newname = "easyVariableName",
-                           split_by_block = FALSE,
-                           keys = NULL,
-                           numeric_to_pos = FALSE,
-                           # numeric_to_pos = FALSE (exclude columns),
-                           # If no exclude warning
-                           dict,
-                           # api_key,
-                           # surveyID,
-                           # datacenter,
-                           api_key,
-                           surveyID,
-                           datacenter,
-                           # Use stikcy for attributes
-                           ...) {
+                            split_by_block = FALSE,
+                            keys = NULL,
+                            numeric_to_pos = FALSE,
+                            # numeric_to_pos = FALSE (exclude columns),
+                            # If no exclude warning
+                            dict,
+                            # api_key,
+                            # surveyID,
+                            # datacenter,
+                            api_key,
+                            surveyID,
+                            datacenter,
+                            # Use stikcy for attributes
+                            ...) {
 
   # Change api_key and survey_id for consistency
 
@@ -71,6 +71,7 @@ get_survey_data <- function(newname = "easyVariableName",
     newnames <- setNames(qids[["QuestionID"]], qids[[newname]])
     dat <- rename(dat[dat_cols], !!!newnames)
 
+    # Move to check?
     split_dict <- split(dict, factor(dict$QuestionID))
     mistake_dict <- check_jsons(split_dict)
     skip_qids <- unique(mistake_dict[["qid"]])

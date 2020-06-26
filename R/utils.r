@@ -1,3 +1,14 @@
+#' @import dplyr
+#' @import tibble
+#' @import tidyr
+#' @import purrr
+#' @import stringr
+#' @import stringi
+#' @import qualtRics
+#' @importFrom magrittr %>%
+#' @export
+qualtrics_api_credentials
+
 which_not_onetoone <- function(cols) {
   which_not_oneto <- function(cols, from, to) {
     cols %>%
@@ -15,7 +26,6 @@ which_not_onetoone <- function(cols) {
 is_onetoone <- function(cols) {
   !any(map_dbl(which_not_onetoone(cols), nrow) > 0)
 }
-
 
 get_match <- function(matches) {
   list(
@@ -56,4 +66,12 @@ survey_rename <- function(survey) {
   )
 
   return(setNames(survey, qid_rename))
+}
+
+unique_expand <- function(x, y) {
+  # Suppose a one-to-one mapping between x and unique(y),
+  # expand x = unique(x) to the same length of y
+  # and preserve the mapping
+
+  recode(y, !!!setNames(x, unique(y)))
 }

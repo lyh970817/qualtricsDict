@@ -1,12 +1,8 @@
 library("googlesheets4")
-library(qualtRics)
-library(tidyverse)
-library(stringdist)
-library(gladfunctions)
-source("./R/utils.r")
-source("./R/checks.r")
-source("./R/dict.r")
-source("./R/get_survey_dat.r")
+devtools::load_all()
+
+
+
 
 json_recode <- function(sheet) {
   dict <- sheet %>%
@@ -121,6 +117,7 @@ surveyID <- "SV_0DrSSOISyMOqN5r"
 dem <- json %>% filter(surveyBlock == "COVID_Baseline_Demographics")
 dict <- json %>% filter(surveyBlock == "COVID_Health_MHQ")
 
+dict_generate(surveyID = surveyID)
 
 mhd <- get_survey_dat(
   newname = "easyVariableName",
