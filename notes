@@ -1,0 +1,25 @@
+* How to get the qualtrics names?
+
+  Just in questionName
+
+* Why is SBS so special?
+
+* What is going on with slider?
+
+  Is it always continuous
+
+* A mindmap for how qualtrics actually works?
+
+* What matters in merging? Item or question?
+
+* Missing mc and text in mc recoding,  N/A not in colnames?
+
+* Some variables not in exported survey
+
+* If the items are ordered, just replace qid in dict with the intersection of colnames and qids?
+
+* Check dictionary - how is the modified rake working?
+
+* Block names. Do other people use it?
+
+* Needs a two-stage make unique. Make unique the block names, paste, and then make unique everything
