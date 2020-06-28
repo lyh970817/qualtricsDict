@@ -3,7 +3,7 @@ library(roxygen2)
 
 imports <- c(
   "dplyr", "tibble", "purrr", "stringr", "stringi", "magrittr",
-  "qualtRics", "slowraker"
+  "qualtRics", "slowraker", "R.utils"
 )
 
 for (i in imports) {

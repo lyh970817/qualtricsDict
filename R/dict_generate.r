@@ -1,16 +1,24 @@
 dict_generate <- function(surveyID,
                           survey_name = NULL,
                           newname = "question_name",
+                          block_pattern = NULL,
+                          block_sep = "_",
                           split_by_block = FALSE,
                           reference_dict = NULL,
                           dict_diff = NULL,
                           import_id = TRUE) {
   easyname_gen <- ifelse(
-    !is.null(reference_dict) & newname == "easyname",
+    is.null(reference_dict) & newname == "easyname",
     TRUE, FALSE
   )
 
-  dict <- recode_json(surveyID, import_id = import_id, easyname_gen)
+  dict <- recode_json(surveyID,
+    import_id = import_id,
+    easyname_gen = easyname_gen,
+    block_pattern = block_pattern,
+    block_sep = block_sep
+  )
+
   dict <- dict[c(
     "qid", newname, "block", "question",
     "item", "level", "label", "type"

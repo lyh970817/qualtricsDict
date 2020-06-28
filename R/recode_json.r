@@ -1,4 +1,5 @@
-recode_json <- function(surveyID, import_id, easyname_gen) {
+recode_json <- function(surveyID, import_id,
+                        easyname_gen, block_pattern, block_sep) {
   mt <- metadata(surveyID,
     get = list(
       "questions" = TRUE,
@@ -101,65 +102,68 @@ recode_json <- function(surveyID, import_id, easyname_gen) {
     enframe(value = "qid", name = "block") %>%
     unnest(qid)
 
-  json <- left_join(json, blocks) %>%
+  json <- left_join(json, blocks, by = "qid") %>%
     select(qid, block, everything())
 
-  browser()
+
   if (import_id) {
     json <- recode_qids(json, surveyID)
   }
   if (easyname_gen) {
-    json <- easyname_gen(json)
+    json <- easyname_gen(json, block_pattern, block_sep)
   }
 
+  json <- recode_type(json)
+
   attr(json, "survey_name") <- mt$metadata$name
+  attr(json, "surveyID") <- surveyID
 
   return(json)
 }
 
 recode_qids <- function(json, surveyID) {
-  survey <- suppressMessages(
+  suppressMessages(
     suppressWarnings(
-      # Hides the progress bar
-      capture.output(fetch_survey(surveyID,
-        import_id = TRUE, convert = FALSE,
-        label = FALSE, force_request = TRUE,
-        limit = 1,
+      invisible(capture.output(
+        survey <- # Hides the progress bar
+          fetch_survey(surveyID,
+            import_id = TRUE, convert = FALSE,
+            label = FALSE, force_request = TRUE,
+            limit = 1,
+          )
       ))
     )
   )
-  # Just take the intersection between nosfx and qids in the dictionary and
-  # replace the second row
 
-  # Second idea is to recode the duplicated qid in readr or make.unique way
-  # and do the same for the survey data frame.
+  survey <- survey_rename(survey)
 
-  ## RESUME HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-  qid_cols_all <- grep("QID", colnames(survey), value = T)
-  qid_cols_nosfx <- str_replace(qid_cols_all, "(#[0-9])?_.+", "")
+  colnames_survey <- colnames(survey)
+  colnames_survey_nosfx <- str_extract(colnames_survey, "QID[0-9]+")
 
   json_sfx <- json %>%
     split(.$qid) %>%
     imap(function(x, n) {
-      qid_cols <- qid_cols_all[which(qid_cols_nosfx == n)]
-      if (length(qid_cols) == 0) {
-        # Note qid_cols can be zero as welcome messages are not exported
+      unique_qids <- colnames_survey[which(colnames_survey_nosfx == n)]
+      if (length(unique_qids) == 0) {
+        # Note unique_qids can be zero as welcome messages are not exported
         # but are in json
       }
-      else if (all(grepl("TEXT", qid_cols))) {
-        x["qid"] <- qid_cols
+      else if (all(grepl("TEXT", unique_qids))) {
+        x["qid"] <- unique_qids
       }
       else {
         # If without subquestions TEXT is in label, is in item if with subquestions
+        # Do we really need this? Need to determine if the ordering of the
+        # text colulmns are done correctly
         has_text_lgl <-
           grepl("TEXT", x$label) |
             grepl("TEXT", x$item)
 
-        non_text_qids <- qid_cols %>%
+        non_text_qids <- unique_qids %>%
           grep("TEXT", ., value = T, invert = T) %>%
           rep(each = nrow(x[!has_text_lgl, "qid"]) / length(.))
 
-        text_qids <- qid_cols %>%
+        text_qids <- unique_qids %>%
           grep("TEXT", ., value = T)
 
         if (length(non_text_qids) > 0) {
@@ -178,8 +182,8 @@ recode_qids <- function(json, surveyID) {
 recode_type <- function(json) {
   json <- mutate(json,
     type = case_when(
+      type == "TE" | grepl("TEXT", qid) ~ "Text",
       type == "MC" ~ "Categorical",
-      type == "TE" ~ "Text",
       type == "Slider" ~ "Continuous",
       selector == "Likert" ~ "Ordinal",
       TRUE ~ type

@@ -1,5 +1,4 @@
 #' @import slowraker
-
 calc_keyword_scores <- function(cand_words, all_words) {
   # Get a list of unique words in each keyword so we don't double count (e.g.,
   # don't double count "vector" in "vector times vector").
@@ -7,7 +6,6 @@ calc_keyword_scores <- function(cand_words, all_words) {
 
   wrd_cnts <- as.matrix(table(unq_wrds))
   all_wrd_cnts <- as.matrix(table(all_words)[rownames(wrd_cnts)])
-
 
   temp_score1 <- vapply(
     rownames(wrd_cnts), function(x) {
@@ -27,7 +25,7 @@ calc_keyword_scores <- function(cand_words, all_words) {
 }
 
 slowrake_atomic <- function(txt, stop_words, all_words, word_min_char, stem, stop_pos,
-                            word_token_annotator, pos_annotator, phrase_delims) {
+                            word_token_annotator, pos_annotator) {
   txt <- paste0(txt, ".")
 
   if (!grepl("[[:alpha:]]", txt)) {
@@ -44,16 +42,14 @@ slowrake_atomic <- function(txt, stop_words, all_words, word_min_char, stem, sto
 
   txt <- tolower(txt)
 
-  cand_words <- get_cand_words(txt, stop_words, phrase_delims)
-  cand_words <- filter_words(cand_words, word_min_char)
+  cand_words <- slowraker2$get_cand_words(txt, stop_words)
+  cand_words <- slowraker2$filter_words(cand_words, word_min_char)
 
   # drop dashes. have to do this at this point instead of sooner b/c we want to
   # apply min word length filter on the complete hyphenated word, not on each
   # component word. note: we are still limited by fact that single letters are
   # in list of stopwords and r thinks that - is a word boundary, so the "k" in
   # "k-means" will be dropped.
-  cand_words <- split_hyphenated_words(cand_words)
-  # all_words <- unlist(split_hyphenated_words(all_words))
 
   if (length(cand_words) == 0) {
     return(NA)
@@ -78,7 +74,7 @@ slowrake_atomic <- function(txt, stop_words, all_words, word_min_char, stem, sto
     keyword_df$stem <- vapply(cand_words, collapse, character(1))
   }
 
-  process_keyword_df(keyword_df)
+  slowraker2$process_keyword_df(keyword_df)
 }
 
 slowrake <- function(txt,
@@ -86,8 +82,7 @@ slowrake <- function(txt,
                      stop_words = smart_words,
                      stop_pos = c("VB", "VBD", "VBG", "VBN", "VBP", "VBZ"),
                      word_min_char = 3,
-                     stem = TRUE,
-                     phrase_delims = "[[:space:]]-[[:space:]]|[,.?():;\"!/]|]|\\[") {
+                     stem = TRUE) {
   num_docs <- length(txt)
   one_doc <- num_docs == 1
 
@@ -103,9 +98,8 @@ slowrake <- function(txt,
   all_out <- vector(mode = "list", length = num_docs)
 
   all_words <- tolower(all_words)
-  all_words <- get_cand_words(all_words, stop_words, phrase_delims)
-  all_words <- filter_words(all_words, word_min_char)
-  all_words <- split_hyphenated_words(all_words)
+  all_words <- slowraker2$get_cand_words(all_words, stop_words)
+  all_words <- slowraker2$filter_words(all_words, word_min_char)
 
   collapse <- function(x) paste0(x, collapse = " ")
   all_words <- vapply(all_words, collapse, character(1))
@@ -121,16 +115,19 @@ slowrake <- function(txt,
       stem = stem,
       stop_pos = stop_pos,
       pos_annotator = pos_annotator,
-      word_token_annotator = word_token_annotator,
-      phrase_delims = phrase_delims
+      word_token_annotator = word_token_annotator
     )
     if (!one_doc) utils::setTxtProgressBar(prog_bar, i)
   }
-  print("finished")
 
   structure(all_out, class = c(class(all_out), "rakelist"))
 }
+#
 
-assignInNamespace("calc_keyword_scores", calc_keyword_scores, ns = "slowraker")
-assignInNamespace("slowrake_atomic", slowrake_atomic, ns = "slowraker")
-assignInNamespace("slowrake", slowrake, ns = "slowraker")
+.internals <- c("get_cand_words", "filter_words", "process_keyword_df")
+# load from the ggplot2 namespace
+slowraker2 <- structure(
+  mapply(function(.internals, i) getFromNamespace(i, "slowraker"), .internals, .internals),
+  class = c("internal")
+)
+ls(getNamespace("slowraker"), all.names = TRUE)

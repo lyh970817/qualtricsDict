@@ -1,9 +1,10 @@
-easyname_gen <- function(json, block_pattern) {
-  json$question[is.na(json$question)] <- json$question[is.na(json$question)]
+easyname_gen <- function(json, block_pattern, block_sep) {
+  json$item[is.na(json$item)] <- json$question[is.na(json$item)]
 
-  # keywords <- slowrake(str_remove_all(unique(json$question), "\\(.+\\)"),
-  #   all_words = paste(json$question, collapse = ""), stop_pos = NULL
-  # )
+  message("Generating easy names...")
+  keywords <- slowrake(str_remove_all(unique(json$item), "\\(.+\\)"),
+    all_words = paste(json$item, collapse = ""), stop_pos = NULL
+  )
 
   # Refer to qualtrics package on how to cache the results
   # save(keywords, file = "./keywords.RData")
@@ -11,10 +12,10 @@ easyname_gen <- function(json, block_pattern) {
 
   keywords_single <- imap_chr(keywords, function(x, i) {
     if (all(is.na(x))) {
-      nm <- unique(json$question)[i]
+      nm <- unique(json$item)[i]
     }
-    else if (stri_count_words(unique(json$question)[i]) <= 7) {
-      nm <- unique(json$question)[i]
+    else if (stri_count_words(unique(json$item)[i]) <= 7) {
+      nm <- unique(json$item)[i]
     }
     else {
       nm <- paste(x[[1]], collapse = " ") %>%
@@ -31,16 +32,32 @@ easyname_gen <- function(json, block_pattern) {
   # Specify regex pattern or a function?
   # perhaps still a function
   # and need to join columns of a matrix
-  block_single <- str_match(unique(json$block), block_pattern)[, 2] %>%
-    tolower() %>%
-    make.unique()
 
-  json$question_easy <- unique_expand(keywords_single, json$question)
+  block_single <-
+    if (!is.null(block_pattern)) {
+      str_match(unique(json$block), block_pattern)[, -1] %>%
+        as_tibble() %>%
+        unite(x, everything(),
+          sep = block_sep,
+          remove = T,
+          na.rm = T
+        ) %>%
+        pull() %>%
+        tolower() %>%
+        make.unique()
+    } else {
+      NA
+    }
+
+  # unique_expand should take a factor like split so we can unique at
+  # item and block
+  json$question_easy <- unique_expand(keywords_single, json$item)
   json$block_easy <- unique_expand(block_single, json$block)
 
-  # Do we need to remove non-easy names here?
   json <- json %>%
-    unite(easyname, block_easy, question_easy, sep = ".") %>%
+    unite(easyname, block_easy, question_easy,
+      sep = ".", na.rm = T
+    ) %>%
     mutate(easyname = easyname) %>%
     select(easyname, everything())
 

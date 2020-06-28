@@ -174,7 +174,7 @@ json_sfx <- json %>%
       if (length(non_text_qids) > 0) {
         tryCatch(
           x[!has_text_lgl, "qid"] <- non_text_qids,
-          error = function(e) browser()
+          error = function(e) 
         )
       }
       if (length(text_qids) > 0) {
@@ -221,7 +221,7 @@ json_sfx <- json %>%
 #   }
 
 # if (qid == "QID124934741") {
-#   browser()
+#   
 # }
 
 

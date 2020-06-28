@@ -22,4 +22,5 @@ Imports:
     magrittr,
     qualtRics,
     tibble,
-    slowraker
+    slowraker,
+    R.utils
