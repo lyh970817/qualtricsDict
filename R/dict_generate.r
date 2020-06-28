@@ -1,21 +1,25 @@
-dict_generate <- function(newname = "easyname",
-                          survey_name,
+dict_generate <- function(surveyID,
+                          survey_name = NULL,
+                          newname = "question_name",
                           split_by_block = FALSE,
                           reference_dict = NULL,
                           dict_diff = NULL,
-                          import_id = TRUE,
-                          surveyID) {
+                          import_id = TRUE) {
   easyname_gen <- ifelse(
     !is.null(reference_dict) & newname == "easyname",
     TRUE, FALSE
   )
 
-  dict <- recode_json(surveyID, import_id, easyname_gen)
+  dict <- recode_json(surveyID, import_id = import_id, easyname_gen)
   dict <- dict[c(
     "qid", newname, "block", "question",
     "item", "level", "label", "type"
   )]
-  attr(dict, "survey_name") <- survey_name
+
+  if (!is.null(survey_name)) {
+    # Is it possible for a qualtrics survey to have no name in metadata?
+    attr(dict, "survey_name") <- survey_name
+  }
 
   if (!is.null(reference_dict)) {
     # Remove qid of reference_dict, we will not use it

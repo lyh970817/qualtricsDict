@@ -28,6 +28,8 @@ mt <- metadata(surveyID,
   )
 )
 
+str(mt, max.level = 1)
+mt$metadata
 
 add_text <- function(x, has_text) {
   if (!is.null(x)) {
@@ -44,8 +46,7 @@ add_text <- function(x, has_text) {
   }
 }
 
-
-question_meta <- map(mt$questions, `[`, c("questionType", "questionText", "blocks", "columns", "choices", "subQuestions"))
+question_meta <- map(mt$questions, `[`, c("questionName", "questionType", "questionText", "blocks", "columns", "choices", "subQuestions"))
 json <- imap(question_meta, function(qjson, qid) {
 
   # Make sure length is at least one so 'rep' won't empty a variable
@@ -53,6 +54,7 @@ json <- imap(question_meta, function(qjson, qid) {
   choice_len <- length(qjson$choices) %>% ifelse(. > 0, ., 1)
 
   # Compulsory variables
+  question_name <- qjson$questionName
   type <- qjson$questionType$type
   question <- qjson$questionText
   selector <- qjson$questionType$selector
@@ -111,7 +113,7 @@ json <- imap(question_meta, function(qjson, qid) {
 
   tibble(
     # new_qid,
-    qid, question,
+    qid, question_name, question,
     item = rep(item, each = choice_len) %>% null_na(),
     level = rep(level, times = sub_q_len) %>% null_na(),
     label = rep(label, times = sub_q_len) %>% null_na(),

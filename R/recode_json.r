@@ -1,4 +1,4 @@
-recode_json <- function(surveyID, import_id = TRUE, easyname_gen = T) {
+recode_json <- function(surveyID, import_id, easyname_gen) {
   mt <- metadata(surveyID,
     get = list(
       "questions" = TRUE,
@@ -10,6 +10,7 @@ recode_json <- function(surveyID, import_id = TRUE, easyname_gen = T) {
   question_meta <- map(
     mt$questions, `[`,
     c(
+      "questionName",
       "questionType", "questionText",
       "blocks", "columns",
       "choices", "subQuestions"
@@ -23,6 +24,7 @@ recode_json <- function(surveyID, import_id = TRUE, easyname_gen = T) {
     choice_len <- length(qjson$choices) %>% ifelse(. > 0, ., 1)
 
     # Compulsory variables
+    question_name <- qjson$questionName
     type <- qjson$questionType$type
     question <- qjson$questionText
     selector <- qjson$questionType$selector
@@ -80,7 +82,7 @@ recode_json <- function(surveyID, import_id = TRUE, easyname_gen = T) {
     }
 
     tibble(
-      qid, question,
+      qid, question_name, question,
       item = rep(item, each = choice_len) %>% null_na(),
       level = rep(level, times = sub_q_len) %>% null_na(),
       label = rep(label, times = sub_q_len) %>% null_na(),
@@ -102,6 +104,7 @@ recode_json <- function(surveyID, import_id = TRUE, easyname_gen = T) {
   json <- left_join(json, blocks) %>%
     select(qid, block, everything())
 
+  browser()
   if (import_id) {
     json <- recode_qids(json, surveyID)
   }
@@ -109,21 +112,29 @@ recode_json <- function(surveyID, import_id = TRUE, easyname_gen = T) {
     json <- easyname_gen(json)
   }
 
+  attr(json, "survey_name") <- mt$metadata$name
+
   return(json)
 }
 
 recode_qids <- function(json, surveyID) {
-  survey <- suppressMessages(fetch_survey(surveyID,
-    import_id = TRUE, convert = FALSE,
-    label = FALSE, force_request = TRUE,
-    limit = 1,
-  )) %>% survey_rename()
-
+  survey <- suppressMessages(
+    suppressWarnings(
+      # Hides the progress bar
+      capture.output(fetch_survey(surveyID,
+        import_id = TRUE, convert = FALSE,
+        label = FALSE, force_request = TRUE,
+        limit = 1,
+      ))
+    )
+  )
   # Just take the intersection between nosfx and qids in the dictionary and
   # replace the second row
 
   # Second idea is to recode the duplicated qid in readr or make.unique way
   # and do the same for the survey data frame.
+
+  ## RESUME HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
   qid_cols_all <- grep("QID", colnames(survey), value = T)
   qid_cols_nosfx <- str_replace(qid_cols_all, "(#[0-9])?_.+", "")
 

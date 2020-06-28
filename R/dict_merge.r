@@ -48,7 +48,7 @@ dict_merge <- function(dict,
     dict[[newname]] <- recode(
       dict[[newname]],
       !!!setNames(
-        dict_diff[["name_reference"]],
+        make.unique(dict_diff[["name_reference"]]),
         dict_diff[["name"]]
       )
     )
@@ -89,7 +89,7 @@ dict_merge <- function(dict,
   ) %>%
     select(.data[[newname_ref]], everything())
 
-  duplicated_ref_names_is <- dict_diff$name_reference %>%
+  duplicated_ref_names_is <- dict_diff[["name_reference"]] %>%
     subset(duplicated(.)) %>%
     map(~ which(reference_dict[[newname_ref]] == .x)) %>%
     unlist()
@@ -107,5 +107,26 @@ dict_merge <- function(dict,
 
   merged[to_fill, -1] <- merged[duplicated_ref_names_is, -1]
 
+  return(merged)
+}
+
+name_map_merge <- function(ref, x, name_cols = c(1, 1), name_map, ...) {
+  args <- list(...)
+  by_ref <- names(args[["by"]])
+  by_x <- args[["by"]]
+
+  ref_df <- as.data.frame(ref)
+  rownames(ref_df) <- ref_df[[1]]
+
+  x_df <- as.data.frame(x)
+  rownames(x_df) <- x_df[[1]]
+
+  x_df[name_map[[2]], by_x] <- ref_df[name_map[[1]], by_ref]
+
+  merged <- full_join(as_tibble(x_df),
+    as_tibble(ref_df),
+    by = by,
+    ...
+  )
   return(merged)
 }
