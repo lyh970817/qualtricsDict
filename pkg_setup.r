@@ -1,9 +1,10 @@
 library(devtools)
 library(roxygen2)
 
+
 imports <- c(
   "dplyr", "tibble", "purrr", "stringr", "stringi", "magrittr",
-  "qualtRics", "slowraker", "R.utils"
+  "slowraker", "stringdist"
 )
 
 for (i in imports) {

@@ -1,10 +1,12 @@
-check_names <- function(dat, newname) {
-  cols <- dat[c("QuestionID", newname)]
+check_names <- function(dict, newname) {
+  cols <- dict[c("qid", newname)]
   which_not_onetoone(cols)
 }
 
 check_item <- function(dat, qid) {
-  cols <- dat[c("valueLabel", "recodeLevel")]
+  newname <- get_newname(dat)
+  item_name <- dat[dat$qid == qid, newname]
+  cols <- dat[c("label", "level")]
 
   # Here recode is sometimes "none" and will cause a warning
   col2_pos <- as.numeric(cols[[2]]) %>%
@@ -24,6 +26,7 @@ check_item <- function(dat, qid) {
     bind_cols(
       tibble(
         qid = qid,
+        item_name,
         mistake = paste(which(has_mistake), collapse = "")
       ),
       cols
@@ -36,5 +39,7 @@ check_json <- function(split_jsons) {
     bind_rows()
   if (nrow(mistakes) > 0) {
     return(mistakes)
+  } else {
+    return(tibble())
   }
 }

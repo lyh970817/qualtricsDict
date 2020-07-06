@@ -6,24 +6,30 @@ get_survey_data <- function(dict,
                             numeric_to_pos = FALSE,
                             numeric_to_pos_exclude = NULL,
                             ...) {
-  newname <- colnames(dict)[1]
+  newname <- get_newname(dict)
   # First validate the dictionary
-  error_list <- dict_validate(dict)$error_list
+  error_list <- dict_validate(dict)$error
   if (!is.null(error_list$non_unique_names)) {
     return(error_list$non_unique_names)
+  }
+
+  if (!is.null(error_list$mistake_dict) > 0) {
+    message("Potential errors with item recoding. Use mistakes() for details.")
   }
   skip_qids <- unique(error_list$mistake_dict[["qid"]])
 
   args <- list(...)
   args$force_request <- TRUE
-  args$surveyID <- surveyID
+  args$surveyID <- attr(dict, "surveyID")
   args$import_id <- TRUE
   args$convert <- FALSE
   args$label <- FALSE
 
-  survey <- do.call(fetch_survey, args) %>%
-    survey_rename(survey)
-  # save(survey, file = "./cache/survey.RData")
+  survey <- do.call(fetch_survey, args)
+
+  # survey_rename(survey)
+  save(survey, file = "./cache/survey.RData")
+  # load("./cache/survey.RData")
 
   if (!is.null(skip_qids) & !skip_mistakes) {
     warning("Potential mistakes in dictionary,
@@ -37,7 +43,6 @@ get_survey_data <- function(dict,
   }
 
   if (split_by_block == TRUE) {
-    # browser()
     keys <- unique(unlist(dict[dict[[newname]] %in% keys, "qid"]))
     keys_dat <- dict[dict[[newname]] %in% keys, ]
 
@@ -52,37 +57,47 @@ get_survey_data <- function(dict,
 
     return(map(block_dict, survey_recode,
       dat = survey,
-      keys = keys
+      keys = keys,
+      unanswer_recode = args$unanswer_recode,
+      unanswer_recode_multi = args$unanswer_recode_multi
     ))
   } else {
-    return(survey_recode(dict, dat = survey, keys = keys))
+    return(survey_recode(dict,
+      dat = survey, keys = keys,
+      unanswer_recode = args$unanswer_recode,
+      unanswer_recode_multi = args$unanswer_recode_multi
+    ))
   }
 }
 
-survey_recode <- function(dict, dat, keys) {
+survey_recode <- function(dict, dat, keys, unanswer_recode, unanswer_recode_multi) {
   unique_qids <- unique(dict[["qid"]])
-  unique_newname <- unique(dict[[newname]])
+  unique_newname <- unique(dict[[get_newname(dict)]])
 
   # How to determine which is ID column?
-  dat_cols <- c("Login ID", keys, "startDate", "endDate", unique_qids)
+  keys <- c("Login ID", "startDate", "endDate", keys)
+  dat_cols <- c(keys, unique_qids)
 
   newnames <- setNames(unique_qids, unique_newname)
   dat <- rename(dat[dat_cols], !!!newnames)
 
   split_dict <- split(dict, factor(dict$qid))
-  dat <- modify2(dat[unique_newname], split_dict, survey_item_recode)
+  dat_vars <- map2_df(
+    dat[unique_newname], split_dict, survey_item_recode,
+    unanswer_recode, unanswer_recode_multi
+  )
   dat <- bind_cols(
-    dat[keys], dat,
+    dat[keys], dat_vars,
     setNames(
-      dat[names(newnames)],
-      paste(names(newnames), "numeric", sep = "_")
+      dat[unique_newname],
+      paste(unique_newname, "numeric", sep = "_")
     )
   )
 
   return(dat)
 }
 
-survey_item_recode <- function(var, item_dict) {
+survey_item_recode <- function(var, item_dict, unanswer_recode, unanswer_recode_multi) {
   # if (is.na(item_dict[["level"]]) &&
   #   # No recode and not text entry, is numerc
   #   item_dict[["type"]] != "Text entry") {
@@ -94,13 +109,13 @@ survey_item_recode <- function(var, item_dict) {
   # }
   # Should be continuous? How to decide?
 
-  if (!is.na(item_dict[["level"]])) {
+  if (any(!is.na(item_dict[["level"]]))) {
     # If only one row in dict it's multiple options
     if (nrow(item_dict) == 1) {
       yes <- item_dict[["label"]]
       levels <- 1
       labels <- yes
-      if (exists("unanswer_recode_multi")) {
+      if (!is.null("unanswer_recode_multi")) {
         levels <- c(levels, unanswer_recode_multi)
         labels <- c(labels, paste("No", yes))
       }
@@ -112,7 +127,7 @@ survey_item_recode <- function(var, item_dict) {
       labels <- item_dict[["label"]]
     }
 
-    if (exists("unanswer_recode")) {
+    if (!is.null("unanswer_recode")) {
       levels <- c(levels, unanswer_recode)
       labels <- c(labels, "Seen but not answered")
     }
@@ -120,9 +135,9 @@ survey_item_recode <- function(var, item_dict) {
 
   var <- factor(var, levels = levels, labels = labels)
 
-  attr(var, "label") <- item_dict[["question"]]
-  # What does this line do? THe default attributes?
-  attr(var, "names") <- NULL
+  text_label <- unique(paste(item_dict[["question"]], item_dict[["item"]]))
+  names(text_label) <- NULL
+  attr(var, "label") <- text_label
 
   return(var)
 }

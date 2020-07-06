@@ -23,4 +23,5 @@ Imports:
     qualtRics,
     tibble,
     slowraker,
-    R.utils
+    R.utils,
+    stringdist

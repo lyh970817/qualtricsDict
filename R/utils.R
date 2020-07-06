@@ -4,12 +4,9 @@
 #' @import purrr
 #' @import stringr
 #' @import stringi
-#' @import qualtRics
+#' @import stringdist
 #' @import slowraker
 #' @importFrom magrittr %>%
-#' @importFrom R.utils reassignInPackage
-#' @export
-qualtrics_api_credentials
 
 which_not_onetoone <- function(cols) {
   which_not_oneto <- function(cols, from, to) {
@@ -70,15 +67,28 @@ remove_format <- function(dat) {
 #   return(setNames(survey, qid_rename))
 # }
 
-unique_expand <- function(x, y) {
-  # Suppose a one-to-one mapping between x and unique(y),
-  # expand x = unique(x) to the same length of y
+unique_expand <- function(x, ...) {
+  # Suppose a one-to-one mapping between unique(x') and unique(...),
+  # expand x = unique(x') to the same length of ...
   # and preserve the mapping
   if (all(is.na(x))) {
     return(x)
   }
-
+  y <- paste(...)
   recode(y, !!!setNames(x, unique(y)))
+}
+
+expand_make_unique <- function(x, expand, y) {
+  stopifnot(length(expand) == length(y))
+
+  expand_x <- unique_expand(x, expand)
+  # bind_cols() outputs a message for not giving colnames
+  expand_unique_x <- suppressMessages(bind_cols(expand_x, expand, y) %>%
+    unique() %>%
+    pull(1) %>%
+    make.unique())
+
+  return(expand_unique_x)
 }
 
 survey_rename <- function(survey) {
@@ -87,4 +97,28 @@ survey_rename <- function(survey) {
   colnames(survey) <- qid_cols_all
 
   return(survey)
+}
+
+get_newname <- function(dict) {
+  if ("qid" %in% colnames(dict)) {
+    colnames(dict)[2]
+  }
+  else {
+    colnames(dict)[1]
+  }
+}
+
+match_all <- function(x, y) {
+  unlist(map(y, ~ which(x == .x)))
+}
+
+reorder <- function(data, col) {
+  fct <- factor(data[[col]], level = unique(data[[col]]))
+  bind_rows(split(data, fct))
+}
+
+paste_narm <- function(...) {
+  sep <- list(...)$sep %>%
+    ifelse(is.null(.), " ", .)
+  str_remove_all(paste(...), paste0(sep, "NA"))
 }

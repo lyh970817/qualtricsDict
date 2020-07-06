@@ -3,8 +3,6 @@ devtools::load_all()
 
 
 
-
-
 json_recode <- function(sheet) {
   dict <- sheet %>%
     select(
@@ -41,7 +39,10 @@ subdict_generate <- function(json, block) {
 
 url <- "https://docs.google.com/spreadsheets/d/1IKrEwkkH52Yxf-Ltfik46YzN8n5EaNIP_LRc-Eung8A/edit?usp=sharing"
 json <- read_sheet(url)
-json <- read_csv("./cache/coping_dict.csv")
+
+readr::write_csv(json, file = "./cache/coping_dict.csv")
+
+json <- readr::read_csv("./cache/coping_dict.csv")
 
 unique(json$surveyBlock)
 

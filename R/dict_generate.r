@@ -4,11 +4,13 @@ dict_generate <- function(surveyID,
                           block_pattern = NULL,
                           block_sep = "_",
                           split_by_block = FALSE,
+                          block = NULL,
                           reference_dict = NULL,
                           dict_diff = NULL,
+                          force_level = FALSE,
                           import_id = TRUE) {
   easyname_gen <- ifelse(
-    is.null(reference_dict) & newname == "easyname",
+    newname == "easyname",
     TRUE, FALSE
   )
 
@@ -18,6 +20,10 @@ dict_generate <- function(surveyID,
     block_pattern = block_pattern,
     block_sep = block_sep
   )
+
+  if (!is.null(block)) {
+    dict <- dict[dict$block == block, ]
+  }
 
   dict <- dict[c(
     "qid", newname, "block", "question",
@@ -30,15 +36,16 @@ dict_generate <- function(surveyID,
   }
 
   if (!is.null(reference_dict)) {
+    newname <- get_newname(reference_dict)
     # Remove qid of reference_dict, we will not use it
     # would this just be removed with contains below?
     reference_dict["qid"] <- NULL
 
     dict <- if (is.null(dict_diff)) {
       message("Consider using 'dict_compare' to track potential matching items")
-      dict_merge(dict, reference_dict)
+      dict_merge(dict, reference_dict, force_level = force_level)
     } else {
-      dict_merge(dict, reference_dict, dict_diff)
+      dict_merge(dict, reference_dict, dict_diff = dict_diff, force_level = force_level)
     }
 
     dict <- dict %>%
@@ -55,6 +62,11 @@ dict_generate <- function(surveyID,
         level, label, type
       )
   }
+
+  # Temporary
+  dict$item[dict$item == dict$question] <- NA
+
+  attr(dict, "surveyID") <- surveyID
 
   if (!import_id) {
     dict$qid <- NULL

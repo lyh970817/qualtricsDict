@@ -1,7 +1,3 @@
-* How to get the qualtrics names?
-
-  Just in questionName
-
 * Why is SBS so special?
 
 * What is going on with slider?
@@ -10,7 +6,7 @@
 
 * A mindmap for how qualtrics actually works?
 
-* What matters in merging? Item or question?
+* What matters in merging? Item or question or label?
 
 * Missing mc and text in mc recoding,  N/A not in colnames?
 
@@ -20,6 +16,8 @@
 
 * Check dictionary - how is the modified rake working?
 
-* Block names. Do other people use it?
+* Block names. Do other people use it? Can do with a function to repalce block_pattern
 
 * Needs a two-stage make unique. Make unique the block names, paste, and then make unique everything
+
+  Still the expand_unique function assumes question + item are unique, what if not?

@@ -1,5 +1,7 @@
 dict_validate <- function(dict) {
+  # WHY IS THIS SLOW? RESUME
   message("Validating dictionary...")
+  newname <- get_newname(dict)
 
   split_dict <- split(dict, factor(dict$qid))
 
@@ -24,7 +26,7 @@ dict_validate <- function(dict) {
   }
 
   if (length(error_list) == 0) {
-    return(unique_pairs)
+    return(level_label_pairs)
   }
   else {
     return(list(

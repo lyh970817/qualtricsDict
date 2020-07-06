@@ -82,7 +82,46 @@ recode_json <- function(surveyID, import_id,
       level <- NA
     }
 
+    new_qid <-
+      if (type == "SBS") {
+        paste(qid, sep = "#", seq_along(unique(question))) %>%
+          map2(level_lens, rep) %>%
+          unlist() %>%
+          paste(sep = "_", rep(seq_along(unique(item)), each = sum(level_lens)))
+      }
+      else if (type == "TE" & selector != "FORM") {
+        paste(qid, sep = "_", "TEXT")
+      }
+      else if (type == "TE" & selector == "FORM") {
+        paste(qid, sep = "_", seq_along(unique(label)))
+      }
+      else if (type == "TE" & selector != "FORM") {
+        paste(qid, sep = "_", "TEXT")
+      }
+      else if (type == "Matrix") {
+        paste(qid, sep = "_", names(item)) %>%
+          rep(each = choice_len)
+      }
+      else if (type == "Slider") {
+        paste(qid, sep = "_", seq_along(item))
+      }
+      else if (selector == "MACOL" | selector == "MAVR") {
+        paste(qid, sep = "_", level)
+      }
+      # WHat should the logic really be here?
+      else if (any(grepl("TEXT", level))) {
+        paste(qid, sep = "_", level) %>%
+          str_remove("_-?[0-9]+$")
+      }
+      else {
+        qid
+      }
+
+    # if (qid == "QID68") {
+    #
+    # }
     tibble(
+      new_qid,
       qid, question_name, question,
       item = rep(item, each = choice_len) %>% null_na(),
       level = rep(level, times = sub_q_len) %>% null_na(),
@@ -102,18 +141,20 @@ recode_json <- function(surveyID, import_id,
     enframe(value = "qid", name = "block") %>%
     unnest(qid)
 
+
   json <- left_join(json, blocks, by = "qid") %>%
+    mutate(qid = new_qid) %>%
     select(qid, block, everything())
 
+  # json <- recode_type(json)
 
-  if (import_id) {
-    json <- recode_qids(json, surveyID)
-  }
+  # if (import_id) {
+  #   json <- recode_qids(json, surveyID)
+  # }
   if (easyname_gen) {
     json <- easyname_gen(json, block_pattern, block_sep)
   }
 
-  json <- recode_type(json)
 
   attr(json, "survey_name") <- mt$metadata$name
   attr(json, "surveyID") <- surveyID
@@ -182,23 +223,27 @@ recode_qids <- function(json, surveyID) {
 recode_type <- function(json) {
   json <- mutate(json,
     type = case_when(
+      selector == "Likert" ~ "Ordinal",
+      selector == "MACOL" ~ "Multiple Categorical",
       type == "TE" | grepl("TEXT", qid) ~ "Text",
       type == "MC" ~ "Categorical",
       type == "Slider" ~ "Continuous",
-      selector == "Likert" ~ "Ordinal",
       TRUE ~ type
     )
   )
+  return(json)
 }
 
 add_text <- function(x, has_text) {
   if (!is.null(x)) {
-    for (i in has_text) {
+    for (i in seq_along(has_text)) {
+      pos <- has_text[i]
+      text <- names(has_text)[i]
       x <- c(
-        x[1:i],
-        paste(x[i], sep = "_", "TEXT"),
+        x[1:pos],
+        paste(text, sep = "_", "TEXT"),
         # This will produce NA, needs removal
-        x[i + 1:length(x)]
+        x[pos + 1:length(x)]
       ) %>%
         discard(is.na)
     }

@@ -1,11 +1,11 @@
 dict_compare <- function(dict, reference_dict) {
-  newname <- colnames(dict)[1]
-  newname_ref <- colnames(reference_dict)[1]
+  newname <- get_newname(dict)
+  newname_ref <- get_newname(reference_dict)
 
   # Not every question will have item???
   question_ref <- reference_dict[["question"]]
   question <- dict[["question"]]
-  question_fuzzy <- ifelse(qt %in% qtr, NA, qt)
+  question_fuzzy <- ifelse(question %in% question_ref, NA, question)
 
   match_is <- match(question, question_ref)
   # Perhaps take Q+I and then I (filled by Q) only and then take the
@@ -43,15 +43,18 @@ dict_compare <- function(dict, reference_dict) {
 
   label_match <- map2_lgl(labels, labels_ref, ~ identical(.x, .y))
 
-  return(
+  if (all(is.na(amatch_is)) & all(is.na(match_is))) {
+    tibble()
+  }
+  else {
     tibble(
       name = dict[[newname]][c(question_fuzzy_is, question_is)],
-      question = qt[c(question_fuzzy_is, question_is)],
+      question = question[c(question_fuzzy_is, question_is)],
       n_levels = map_dbl(labels, length),
-      name_reference = reference_dict[[newname]][
+      name_reference = reference_dict[[newname_ref]][
         c(question_ref_fuzzy, question_ref_is)
       ],
-      question_reference = qtr[c(question_ref_fuzzy, question_ref_is)],
+      question_reference = question_ref[c(question_ref_fuzzy, question_ref_is)],
       n_levels_ref = map_dbl(labels_ref, length),
       identical = c(
         rep(FALSE, times = length(question_fuzzy_is)),
@@ -62,7 +65,7 @@ dict_compare <- function(dict, reference_dict) {
       # Do we still need this?
       .[!duplicated(.), ] %>%
       na.omit()
-  )
+  }
 }
 
 ## Or do we just get a matrix and order the similarities?
