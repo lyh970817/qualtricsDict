@@ -68,21 +68,27 @@ remove_format <- function(dat) {
 # }
 
 unique_expand <- function(x, ...) {
-  # Suppose a one-to-one mapping between unique(x') and unique(...),
-  # expand x = unique(x') to the same length of ...
+  # Suppose x = unique(x') and a one-to-one mapping between x and
+  # unique(paste(...)),
+  # expand x to the same length of ...
   # and preserve the mapping
   if (all(is.na(x))) {
     return(x)
   }
   y <- paste(...)
+  y[y == ""] <- " "
   recode(y, !!!setNames(x, unique(y)))
 }
 
-expand_make_unique <- function(x, expand, y) {
+reference_make_unique <- function(x, expand, y) {
+  # Create a unique mapping between set x and all pairs (expand, y),
+  # where for each e_i in expand there is k_i x_i in x (so that we can
+  # unique expand)
   stopifnot(length(expand) == length(y))
 
   expand_x <- unique_expand(x, expand)
   # bind_cols() outputs a message for not giving colnames
+  # expand not required in the second column?
   expand_unique_x <- suppressMessages(bind_cols(expand_x, expand, y) %>%
     unique() %>%
     pull(1) %>%

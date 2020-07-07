@@ -1,19 +1,22 @@
 easyname_gen <- function(json, block_pattern, block_sep) {
   # Temporary
   json$item[is.na(json$item)] <- json$question[is.na(json$item)]
-  # ma_lgl <- json$type == "Multiple Categorical"
-  # json$item[ma_lgl] <- paste(json$item[ma_lgl], json$label[ma_lgl])
+  ma_lgl <- json$type == "Multiple Categorical"
+  json$item[ma_lgl] <- paste(json$label[ma_lgl])
 
-  message("Generating easy names...")
-  # keywords <- slowrake(str_remove_all(unique(json$item), "\\(.+\\)"),
-  #   all_words = paste(json$item, collapse = ""), stop_pos = NULL
-  # )
+  if (file.exists("./.keywords.RData")) {
+    load("./.keywords.RData")
+  }
 
-  # # Refer to qualtrics package on how to cache the results
-  # save(keywords, file = "./keywords1.RData")
+  if (!file.exists("./.keywords.RData") || length(unique(json$item)) != length(keywords)) {
+    message("Generating easy names...")
+    keywords <- slowrake(str_remove_all(unique(json$item), "\\(.+\\)"),
+      all_words = paste(json$item, collapse = ""), stop_pos = NULL
+    )
+  }
 
-  # save(keywords, file = "./keywords1.RData")
-  load("./keywords1.RData")
+  # Refer to qualtrics package on how to cache the results
+  save(keywords, file = "./.keywords.RData")
 
   keywords_single <- imap_chr(keywords, function(x, i) {
     if (all(is.na(x))) {
@@ -57,10 +60,9 @@ easyname_gen <- function(json, block_pattern, block_sep) {
   # t <- bind_cols(json$item, json$question)
   # print(t, n = 2500)
 
-  keywords_item_question_unique <- expand_make_unique(keywords_single, json$item, json$question)
+  keywords_item_question_unique <- reference_make_unique(keywords_single, json$item, json$question)
   json$question_easy <- unique_expand(keywords_item_question_unique, json$item, json$question)
   json$block_easy <- unique_expand(block_single, json$block)
-
 
   json <- json %>%
     unite(easyname, block_easy, question_easy,
@@ -68,6 +70,16 @@ easyname_gen <- function(json, block_pattern, block_sep) {
     ) %>%
     mutate(easyname = easyname) %>%
     select(easyname, everything())
+
+  duplicated_easynames <- which_not_onetoone(json[c("easyname", "qid")])[[1]]
+  duplicated_easynames["easyname"] <- make.unique(duplicated_easynames[["easyname"]])
+  all_easynames <- bind_rows(
+    duplicated_easynames,
+    json[!json$qid %in% duplicated_easynames$qid, c("easyname", "qid")]
+  )
+  json$easyname <- recode(json$qid, !!!setNames(all_easynames$easyname, all_easynames$qid))
+
+  json$easyname <- str_remove_all(json$easyname, "[^0-9a-z_\\.]")
 
   return(json)
 

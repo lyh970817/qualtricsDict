@@ -4,7 +4,13 @@ dict_compare <- function(dict, reference_dict) {
 
   # Not every question will have item???
   question_ref <- reference_dict[["question"]]
+  ma_lgl_ref <- reference_dict$type == "Multiple Categorical"
+  question_ref[ma_lgl_ref] <- paste(question_ref[ma_lgl_ref], reference_dict$label[ma_lgl_ref])
+
   question <- dict[["question"]]
+  ma_lgl <- dict$type == "Multiple Categorical"
+  question[ma_lgl] <- paste(question[ma_lgl], dict$label[ma_lgl])
+
   question_fuzzy <- ifelse(question %in% question_ref, NA, question)
 
   match_is <- match(question, question_ref)

@@ -17,6 +17,7 @@ dict_merge <- function(dict,
   }
 
   if (is.null(dict_diff)) {
+    # Implement this
     message("Consider using 'dict_compare' to track potential matching items")
   } else if (nrow(dict_diff) > 0) {
     # Recode item, label and newname in dict according to dict_ref

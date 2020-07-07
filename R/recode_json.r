@@ -1,5 +1,20 @@
 recode_json <- function(surveyID, import_id,
                         easyname_gen, block_pattern, block_sep) {
+  suppressMessages(
+    suppressWarnings(
+      invisible(capture.output(
+        survey <- # Hides the progress bar
+          fetch_survey(surveyID,
+            import_id = TRUE, convert = FALSE,
+            label = FALSE, force_request = TRUE,
+            limit = 1,
+          )
+      ))
+    )
+  )
+
+  qids_data <- discard(str_extract(colnames(survey), "QID[0-9]+"), is.na)
+
   mt <- metadata(surveyID,
     get = list(
       "questions" = TRUE,
@@ -18,9 +33,10 @@ recode_json <- function(surveyID, import_id,
     )
   )
 
-  json <- imap(question_meta, function(qjson, qid) {
+  question_meta <- question_meta[unique(qids_data)]
 
-    # Make sure length is at least one so 'rep' won't empty a variable
+  json <- imap(question_meta, function(qjson, qid) {
+    print(qid)
     sub_q_len <- length(qjson$subQuestions) %>% ifelse(. > 0, ., 1)
     choice_len <- length(qjson$choices) %>% ifelse(. > 0, ., 1)
 
@@ -30,19 +46,16 @@ recode_json <- function(surveyID, import_id,
     question <- qjson$questionText
     selector <- qjson$questionType$selector
 
+    # Levels have recodes and original levels
+    # Labels have lbels and original levels
+    # Subquestions have questions and original levels
+
     level <- unlist(map(qjson$choices, "recode"))
     label <- unlist(map(qjson$choices, "choiceText"))
-    sub_selector <- qjson$questionType$subSelector
 
-    # These do not appear in colnames
-    if (!is.null(label)) {
-      which_na <- label == "N/A"
-      label <- label[!which_na]
-      level <- level[!which_na]
-    }
+    # Discard qids that are not in the datafile
 
     has_text <- which(map_lgl(qjson$choices, ~ "textEntry" %in% names(.x)))
-    has_text_sub <- which(map_lgl(qjson$subQuestions, ~ "textEntry" %in% names(.x)))
 
     if (length(has_text) > 0) {
       # Add text level and labels directly after the non-text level
@@ -50,13 +63,18 @@ recode_json <- function(surveyID, import_id,
       label <- add_text(label, has_text)
     }
 
+    has_text_sub <- which(map_lgl(qjson$subQuestions, ~ "textEntry" %in% names(.x)))
+    # subQuestions instead of items
     item <- unlist(map(qjson$subQuestions, "choiceText"))
+    sub_selector <- qjson$questionType$subSelector
     if (length(has_text_sub) > 0) {
       item <- add_text(item, has_text_sub)
       sub_q_len <- sub_q_len + 1
     }
 
-    if (type == "SBS") {
+    # Zero length columns means it's a carried forward question
+    if (type == "SBS" & length(qjson$columns) != 0) {
+      # Reuse matrix code
       level_lens <- map(qjson$columns, "choices") %>% map_dbl(length)
       choice_len <- sum(level_lens)
 
@@ -73,55 +91,25 @@ recode_json <- function(surveyID, import_id,
         map(~ map_chr(.x, "description")) %>%
         unlist()
 
+      # Supposedly we can easily add text here but needs testing
       item <- unlist(map(qjson$subQuestions, "choiceText"))
+
+      qid <- paste(qid, sep = "#", seq_along(unique(question))) %>%
+        map2(level_lens, rep) %>%
+        unlist() %>%
+        rep(times = length(item))
     }
+
 
     if (type == "Slider") {
       choice_len <- 1
       sub_q_len <- 1
+      slider_level <- level
       level <- NA
     }
 
-    new_qid <-
-      if (type == "SBS") {
-        paste(qid, sep = "#", seq_along(unique(question))) %>%
-          map2(level_lens, rep) %>%
-          unlist() %>%
-          paste(sep = "_", rep(seq_along(unique(item)), each = sum(level_lens)))
-      }
-      else if (type == "TE" & selector != "FORM") {
-        paste(qid, sep = "_", "TEXT")
-      }
-      else if (type == "TE" & selector == "FORM") {
-        paste(qid, sep = "_", seq_along(unique(label)))
-      }
-      else if (type == "TE" & selector != "FORM") {
-        paste(qid, sep = "_", "TEXT")
-      }
-      else if (type == "Matrix") {
-        paste(qid, sep = "_", names(item)) %>%
-          rep(each = choice_len)
-      }
-      else if (type == "Slider") {
-        paste(qid, sep = "_", seq_along(item))
-      }
-      else if (selector == "MACOL" | selector == "MAVR") {
-        paste(qid, sep = "_", level)
-      }
-      # WHat should the logic really be here?
-      else if (any(grepl("TEXT", level))) {
-        paste(qid, sep = "_", level) %>%
-          str_remove("_-?[0-9]+$")
-      }
-      else {
-        qid
-      }
-
-    # if (qid == "QID68") {
-    #
-    # }
-    tibble(
-      new_qid,
+    t <- tibble(
+      new_qid = qid,
       qid, question_name, question,
       item = rep(item, each = choice_len) %>% null_na(),
       level = rep(level, times = sub_q_len) %>% null_na(),
@@ -129,6 +117,11 @@ recode_json <- function(surveyID, import_id,
       type, selector,
       sub_selector = null_na(sub_selector)
     )
+
+    if (is.null(t)) {
+      browser()
+    }
+    return(t)
   }) %>%
     bind_rows() %>%
     remove_format()
@@ -141,16 +134,16 @@ recode_json <- function(surveyID, import_id,
     enframe(value = "qid", name = "block") %>%
     unnest(qid)
 
-
   json <- left_join(json, blocks, by = "qid") %>%
     mutate(qid = new_qid) %>%
     select(qid, block, everything())
 
-  # json <- recode_type(json)
+  json %>% filter(qid == "QID125585254")
+  json <- recode_type(json)
 
-  # if (import_id) {
-  #   json <- recode_qids(json, surveyID)
-  # }
+  if (import_id) {
+    json <- recode_qids(json, survey)
+  }
   if (easyname_gen) {
     json <- easyname_gen(json, block_pattern, block_sep)
   }
@@ -162,28 +155,18 @@ recode_json <- function(surveyID, import_id,
   return(json)
 }
 
-recode_qids <- function(json, surveyID) {
-  suppressMessages(
-    suppressWarnings(
-      invisible(capture.output(
-        survey <- # Hides the progress bar
-          fetch_survey(surveyID,
-            import_id = TRUE, convert = FALSE,
-            label = FALSE, force_request = TRUE,
-            limit = 1,
-          )
-      ))
-    )
-  )
-
-  survey <- survey_rename(survey)
-
+recode_qids <- function(json, survey) {
   colnames_survey <- colnames(survey)
-  colnames_survey_nosfx <- str_extract(colnames_survey, "QID[0-9]+")
+  colnames_survey_nosfx <- str_extract(colnames_survey, "QID[0-9]+(#[0-9]+)?")
 
   json_sfx <- json %>%
     split(.$qid) %>%
     imap(function(x, n) {
+      print(n)
+      if (n == "QID694") {
+        # What's going on here??
+        return(x)
+      }
       unique_qids <- colnames_survey[which(colnames_survey_nosfx == n)]
       if (length(unique_qids) == 0) {
         # Note unique_qids can be zero as welcome messages are not exported
@@ -208,10 +191,13 @@ recode_qids <- function(json, surveyID) {
           grep("TEXT", ., value = T)
 
         if (length(non_text_qids) > 0) {
-          x[!has_text_lgl, "qid"] <- non_text_qids
+          if (nrow(x[!has_text_lgl, "qid"]) != length(non_text_qids)) {
+            warning("Unexported level in ", n, " is not supported")
+          }
+          x[!has_text_lgl, "qid"][seq(length(non_text_qids)), ] <- non_text_qids
         }
         if (length(text_qids) > 0) {
-          x[has_text_lgl, "qid"] <- text_qids
+          tryCatch(x[has_text_lgl, "qid"] <- text_qids, error = function(e) browser())
         }
       }
       return(x)
@@ -224,7 +210,7 @@ recode_type <- function(json) {
   json <- mutate(json,
     type = case_when(
       selector == "Likert" ~ "Ordinal",
-      selector == "MACOL" ~ "Multiple Categorical",
+      selector == "MACOL" | selector == "MAVR" ~ "Multiple Categorical",
       type == "TE" | grepl("TEXT", qid) ~ "Text",
       type == "MC" ~ "Categorical",
       type == "Slider" ~ "Continuous",
