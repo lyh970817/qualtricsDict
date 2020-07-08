@@ -21,8 +21,8 @@ dict_merge <- function(dict,
     # Implement this
     message("Consider using 'dict_compare' to track potential matching items")
   } else if (nrow(dict_diff) > 0) {
-    if (all(dict_diff[["name"]] %in% dict[[newname]]) &&
-      all(dict_diff[["name_reference"]] %in% reference_dict[[newname]])) {
+    if (!(all(dict_diff[["name"]] %in% dict[[newname]]) &&
+      all(dict_diff[["name_reference"]] %in% reference_dict[[newname]]))) {
       stop("dict_diff file does not correspond to dicts to be merged.")
     }
     # Recode item, label and newname in dict according to dict_ref
@@ -97,7 +97,7 @@ dict_merge <- function(dict,
   dict[survey_name] <- TRUE
 
   merged <- full_join(reference_dict, dict,
-    by = c(setNames(newname, newname_ref), "question", "label"),
+    by = c(setNames(newname, newname_ref), "label"),
     suffix = c(
       paste0("_", survey_name_ref),
       paste0("_", survey_name)

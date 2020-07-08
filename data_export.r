@@ -70,6 +70,7 @@ write_sheet(dem_coping, ss = url, sheet = "COPING_DEM")
 write_sheet(dem_diff_ramp, ss = url, sheet = "RAMP_GLAD_DEM")
 write_sheet(dem_diff_coping, ss = url, sheet = "COPING_GLAD_DEM")
 
+
 # MHQ
 valid_mhq_glad <- dict_validate(dict_glad[["UKBB MHQ Section A - General Mental Health"]])
 mhq_glad <- dict_glad[["UKBB MHQ Section A - General Mental Health"]]

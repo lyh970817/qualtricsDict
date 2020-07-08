@@ -1,18 +1,21 @@
-dict_compare <- function(dict, reference_dict, field = "item") {
+dict_compare <- function(dict, reference_dict, field = "item", reference_survey = NULL) {
   newname <- get_newname(dict)
   newname_ref <- get_newname(reference_dict)
 
-  # Not every question will have item???
-  question_ref <- do.call(paste_narm, as.list(reference_dict[field]))
-  question_ref[question_ref == ""] <- reference_dict[["question"]][question_ref == ""]
-  # ma_lgl_ref <-
-  #   or(map(reference_dict %>% select(contains("type")), ~ .x == "Multiple Categorical"))
-  # question_ref[ma_lgl_ref] <- paste(question_ref[ma_lgl_ref], reference_dict$label[ma_lgl_ref])
+  if (!is.null(reference_survey)) {
+    ref_field <- paste(field, survey, sep = "_")
+    ref_question_field <- paste("question", survey, sep = "_")
+  }
+  else {
+    ref_field <- field
+    ref_question_field <- "question"
+  }
 
   question <- do.call(paste_narm, as.list(dict[field]))
   question[question == ""] <- dict[["question"]][question == ""]
-  # ma_lgl <- dict$type == "Multiple Categorical"
-  # question[ma_lgl] <- paste(question[ma_lgl], dict$label[ma_lgl])
+
+  question_ref <- do.call(paste_narm, as.list(reference_dict[names(ref_field)]))
+  question_ref[question_ref == ""] <- reference_dict[[ref_question_field]][question_ref == ""]
 
   question_fuzzy <- ifelse(question %in% question_ref, NA, question)
   question_ref_fuzzy <- ifelse(question_ref %in% question, NA, question_ref)
