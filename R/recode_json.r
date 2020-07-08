@@ -36,7 +36,6 @@ recode_json <- function(surveyID, import_id,
   question_meta <- question_meta[unique(qids_data)]
 
   json <- imap(question_meta, function(qjson, qid) {
-    print(qid)
     sub_q_len <- length(qjson$subQuestions) %>% ifelse(. > 0, ., 1)
     choice_len <- length(qjson$choices) %>% ifelse(. > 0, ., 1)
 
@@ -124,7 +123,8 @@ recode_json <- function(surveyID, import_id,
     return(t)
   }) %>%
     bind_rows() %>%
-    remove_format()
+    # Don't get rid of bracekts in labels
+    remove_format(skip = "label")
 
   blocks <- mt$blocks %>%
     # set the names to block names so we can enframe
@@ -162,7 +162,7 @@ recode_qids <- function(json, survey) {
   json_sfx <- json %>%
     split(.$qid) %>%
     imap(function(x, n) {
-      print(n)
+      # print(n)
       if (n == "QID694") {
         # What's going on here??
         return(x)
@@ -220,18 +220,22 @@ recode_type <- function(json) {
   return(json)
 }
 
-add_text <- function(x, has_text) {
+add_text <- function(x, has_text, label = F) {
   if (!is.null(x)) {
     for (i in seq_along(has_text)) {
       pos <- has_text[i]
-      text <- names(has_text)[i]
+      text <- names(x)[pos]
+      text_nm <- x[pos]
       x <- c(
         x[1:pos],
-        paste(text, sep = "_", "TEXT"),
+        paste(text_nm, sep = "_", "TEXT"),
         # This will produce NA, needs removal
         x[pos + 1:length(x)]
       ) %>%
         discard(is.na)
+
+      # Required for sub
+      names(x)[pos + 1] <- paste(text, sep = "_", "TEXT")
     }
     return(x)
   }

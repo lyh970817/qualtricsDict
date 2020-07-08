@@ -34,24 +34,33 @@ easyname_gen <- function(json, block_pattern, block_sep) {
         paste(collapse = "_")
     }
     return(tolower(str_replace_all(nm, "\\s", "_")))
-  }) %>%
-    make.unique()
+  })
+  # %>%
+  #   make.unique()
 
   # Specify regex pattern or a function?
   # perhaps still a function
   # and need to join columns of a matrix
 
+  # block_single <-
+  #   if (!is.null(block_pattern)) {
+  #     str_match(unique(json$block), block_pattern)[, -1] %>%
+  #       as_tibble() %>%
+  #       unite(x, everything(),
+  #         sep = block_sep,
+  #         remove = T,
+  #         na.rm = T
+  #       ) %>%
+  #       pull() %>%
+  #       tolower() %>%
+  #       make.unique()
+  #   } else {
+  #     NA
+  #   }
+
   block_single <-
     if (!is.null(block_pattern)) {
-      str_match(unique(json$block), block_pattern)[, -1] %>%
-        as_tibble() %>%
-        unite(x, everything(),
-          sep = block_sep,
-          remove = T,
-          na.rm = T
-        ) %>%
-        pull() %>%
-        tolower() %>%
+      map_chr(unique(json$block), block_pattern) %>%
         make.unique()
     } else {
       NA
@@ -60,8 +69,9 @@ easyname_gen <- function(json, block_pattern, block_sep) {
   # t <- bind_cols(json$item, json$question)
   # print(t, n = 2500)
 
-  keywords_item_question_unique <- reference_make_unique(keywords_single, json$item, json$question)
-  json$question_easy <- unique_expand(keywords_item_question_unique, json$item, json$question)
+  # keywords_item_question_unique <- reference_make_unique(keywords_single, json$item, json$question)
+
+  json$question_easy <- unique_expand(keywords_single, json$item)
   json$block_easy <- unique_expand(block_single, json$block)
 
   json <- json %>%
@@ -71,6 +81,10 @@ easyname_gen <- function(json, block_pattern, block_sep) {
     mutate(easyname = easyname) %>%
     select(easyname, everything())
 
+  # txt_qs <- grep("_TEXT", json$level)
+  # no_txt_name <- grep("text", json$easyname[txt_qs], invert = T)
+  # json$easyname[txt_qs][no_txt_name] <- paste(json$easyname[txt_qs][no_txt_name], "_text")
+
   duplicated_easynames <- which_not_onetoone(json[c("easyname", "qid")])[[1]]
   duplicated_easynames["easyname"] <- make.unique(duplicated_easynames[["easyname"]])
   all_easynames <- bind_rows(
@@ -79,7 +93,7 @@ easyname_gen <- function(json, block_pattern, block_sep) {
   )
   json$easyname <- recode(json$qid, !!!setNames(all_easynames$easyname, all_easynames$qid))
 
-  json$easyname <- str_remove_all(json$easyname, "[^0-9a-z_\\.]")
+  json$easyname <- str_remove_all(json$easyname, "[^0-9A-Za-z_\\.]")
 
   return(json)
 

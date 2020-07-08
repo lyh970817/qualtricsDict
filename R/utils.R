@@ -41,14 +41,19 @@ null_na <- function(x) {
   }
 }
 
-remove_format <- function(dat) {
-  mutate_if(
-    dat, is.character,
+remove_format <- function(data, skip) {
+  chr_cols <- discard(colnames(data), ~ . %in% c(skip))
+  mutate_at(
+    data, vars(-question_name),
     ~ str_remove_all(., "(<[^>]+>|\\n)+") %>%
       str_remove_all("Selected Choice - ") %>%
-      str_remove_all("\\(.*\\)") %>%
       str_squish()
-  )
+  ) %>%
+    mutate_at(
+      vars(chr_cols),
+      ~ str_remove_all(., "\\(.*\\)") %>%
+        str_squish()
+    )
 }
 
 # survey_rename <- function(survey) {
@@ -126,5 +131,18 @@ reorder <- function(data, col) {
 paste_narm <- function(...) {
   sep <- list(...)$sep %>%
     ifelse(is.null(.), " ", .)
-  str_remove_all(paste(...), paste0(sep, "NA"))
+  str_remove_all(paste(...), paste0("NA")) %>%
+    str_squish()
+}
+
+or <- function(x) {
+  if (length(x) > 1) {
+    lgl <- do.call(`|`, x)
+  }
+  else {
+    lgl <- unlist(x)
+  }
+
+  lgl[is.na(lgl)] <- FALSE
+  return(lgl)
 }

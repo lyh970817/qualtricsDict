@@ -98,46 +98,43 @@ survey_recode <- function(dict, dat, keys, unanswer_recode, unanswer_recode_mult
 }
 
 survey_item_recode <- function(var, item_dict, unanswer_recode, unanswer_recode_multi) {
-  # if (is.na(item_dict[["level"]]) &&
-  #   # No recode and not text entry, is numerc
-  #   item_dict[["type"]] != "Text entry") {
-  #   if (numeric_to_pos) {
-  #     var <- abs(as.numeric(var))
-  #   } else {
-  #     var <- as.numeric(var)
-  #   }
-  # }
-  # Should be continuous? How to decide?
-
-  if (any(!is.na(item_dict[["level"]]))) {
-    # If only one row in dict it's multiple options
-    if (nrow(item_dict) == 1) {
-      yes <- item_dict[["label"]]
-      levels <- 1
-      labels <- yes
-      if (!is.null("unanswer_recode_multi")) {
-        levels <- c(levels, unanswer_recode_multi)
-        labels <- c(labels, paste("No", yes))
-      }
-    }
-
-    # If multiple rows it's ordinal
-    if (nrow(item_dict) > 1) {
-      levels <- item_dict[["level"]]
-      labels <- item_dict[["label"]]
-    }
-
-    if (!is.null("unanswer_recode")) {
-      levels <- c(levels, unanswer_recode)
-      labels <- c(labels, "Seen but not answered")
+  if (all(item_dict[["type"]] == "Text")) {
+    if (numeric_to_pos) {
+      var <- abs(as.numeric(var))
+    } else {
+      var <- as.numeric(var)
     }
   }
 
+  if (all(item_dict[["type"]] == "Multiple Categorical")) {
+    # If only one row in dict it's multiple options
+    yes <- item_dict[["label"]]
+    levels <- 1
+    labels <- yes
+    if (!is.null(unanswer_recode_multi)) {
+      levels <- c(levels, unanswer_recode_multi)
+      labels <- c(labels, paste("No", yes))
+    }
+  }
+
+  # If multiple rows it's ordinal
+  if (nrow(item_dict) > 1) {
+    labels <- item_dict[["label"]]
+    levels <- item_dict[["level"]]
+    labels <- grep("TEXT", labels, invert = T, value = T)
+    levels <- grep("TEXT", levels, invert = T, value = T)
+  }
+
+  if (!is.null(unanswer_recode)) {
+    levels <- c(levels, unanswer_recode)
+    labels <- c(labels, "Seen but not answered")
+  }
+
+  print(item_dict[["easyname"]])
   var <- factor(var, levels = levels, labels = labels)
 
   text_label <- unique(paste(item_dict[["question"]], item_dict[["item"]]))
-  names(text_label) <- NULL
-  attr(var, "label") <- text_label
+  var <- set_label(var, text_label)
 
   return(var)
 }

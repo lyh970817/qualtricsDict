@@ -9,8 +9,10 @@ check_item <- function(dat, qid) {
   cols <- dat[c("label", "level")]
 
   # Here recode is sometimes "none" and will cause a warning
-  col2_pos <- as.numeric(cols[[2]]) %>%
-    subset(. >= 0)
+  col2_pos <- suppressWarnings(
+    as.numeric(cols[[2]]) %>%
+      subset(. >= 0)
+  )
 
   has_mistake <- c(
     # Check correspondence

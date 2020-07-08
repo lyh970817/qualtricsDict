@@ -1,4 +1,3 @@
 cache/
 surveydict/
-./keywords.RData
-./keywords1.RData
+*.RData
