@@ -6,6 +6,7 @@
 #' @import stringi
 #' @import stringdist
 #' @import slowraker
+#' @import qualtRics
 #' @importFrom magrittr %>%
 
 which_not_onetoone <- function(cols) {

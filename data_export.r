@@ -1,7 +1,16 @@
 devtools::load_all()
 library(googlesheets4)
-library("qualtRics")
-url <- "https://docs.google.com/spreadsheets/d/1Ag0jmI0j15bEgxIuxaKyAHVyXZ9ZPPInndVyMNdra8Q/edit#gid=0"
+library("ropensci/qualtRics", force = T)
+url <- "https://docs.google.com/spreadsheets/d/1Vp028XLxbcXeOdjeuI-3y-kVenKWDR4hW9iJ1tHpttI/edit#gid=935710032"
+
+length(diffs_dat)
+sheets <- sheet_names(url)
+diff_sheets <- sheets[grepl("DIFF", sheets)]
+diffs_dat <- map(diffs, ~ read_sheet(url, sheet = .x)) %>%
+  setNames(diff_sheets)
+
+ramp_diff <- bind_rows(diffs_dat[grep("RAMP", names(diffs_dat))])
+coping_diff <- bind_rows(diffs_dat[grep("COPING", names(diffs_dat))])
 
 qualtrics_api_credentials(
   api_key = " lvajnhOtUPt2PMf1taRfmwKOOsYOzSAfNdZbEzOw",
@@ -41,16 +50,15 @@ glad_block_fun <- function(x) {
 }
 
 # How does the progress bar work?
-load("./image.RData")
+save.image("./.RData")
 dict_glad <- dict_generate(surveyID = gladID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
-dict_ramp <- dict_generate(rampID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
-dict_coping1 <- dict_generate(copingID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
-dict_coping2 <- dict_generate(copingID2, newname = "easyname", block_pattern = "_([^_]+$)", split_by_block = T)
-dict_coping3 <- dict_generate(copingID2, newname = "easyname", block_pattern = "_([^_]+$)", split_by_block = T)
+dict_ramp <- dict_generate(rampID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = ramp_diff)
+dict_coping1 <- dict_generate(copingID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
+dict_coping2 <- dict_generate(copingID2, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
+dict_coping3 <- dict_generate(copingID2, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
 
 # GLAD
 valid_dem_glad <- dict_validate(dict_glad[["Demographics"]])
-dem_glad <- dict_glad[["Demographics"]]
 # write_sheet(dem_glad, ss = url, sheet = "GLAD_DEM")
 
 valid_dem_ramp <- dict_validate(dict_ramp[["COVID_Baseline_Demographics"]])
@@ -155,3 +163,35 @@ write_sheet(phq_coping, ss = url, sheet = "COPING_PHQ")
 
 write_sheet(phq_diff_ramp, ss = url, sheet = "RAMP_GLAD_PHQ")
 write_sheet(phq_diff_coping, ss = url, sheet = "COPING_GLAD_PHQ")
+
+get_survey_data(dem_glad, limit = 10)
+
+saveRDS(get_survey_data(dem_glad), "~/Data/COPING/glad/dem_glad.rds")
+saveRDS(get_survey_data(dem_ramp), "~/Data/COPING/ramp/dem_ramp.rds")
+saveRDS(get_survey_data(dem_coping_nbr), "~/Data/COPING/coping_nbr/dem_coping_nbr.rds")
+saveRDS(get_survey_data(dem_coping_glad), "~/Data/COPING/coping_glad/dem_coping_glad.rds")
+saveRDS(get_survey_data(dem_coping_edgi), "~/Data/COPING/coping_edgi/dem_coping_edgi.rds")
+
+saveRDS(get_survey_data(mhq_glad), "~/Data/COPING/glad/mhq_glad.rds")
+saveRDS(get_survey_data(mhq_ramp), "~/Data/COPING/ramp/mhq_ramp.rds")
+saveRDS(get_survey_data(mhq_coping_nbr), "~/Data/COPING/coping_nbr/mhq_coping_nbr.rds")
+saveRDS(get_survey_data(mhq_coping_glad), "~/Data/COPING/coping_glad/mhq_coping_glad.rds")
+saveRDS(get_survey_data(mhq_coping_edgi), "~/Data/COPING/coping_edgi/mhq_coping_edgi.rds")
+
+saveRDS(get_survey_data(pcl_glad), "~/Data/COPING/glad/pcl_glad.rds")
+saveRDS(get_survey_data(pcl_ramp), "~/Data/COPING/ramp/pcl_ramp.rds")
+saveRDS(get_survey_data(pcl_coping_nbr), "~/Data/COPING/coping_nbr/pcl_coping_nbr.rds")
+saveRDS(get_survey_data(pcl_coping_glad), "~/Data/COPING/coping_glad/pcl_coping_glad.rds")
+saveRDS(get_survey_data(pcl_coping_edgi), "~/Data/COPING/coping_edgi/pcl_coping_edgi.rds")
+
+saveRDS(get_survey_data(gad_glad), "~/Data/COPING/glad/gad_glad.rds")
+saveRDS(get_survey_data(gad_ramp), "~/Data/COPING/ramp/gad_ramp.rds")
+saveRDS(get_survey_data(gad_coping_nbr), "~/Data/COPING/coping_nbr/gad_coping_nbr.rds")
+saveRDS(get_survey_data(gad_coping_glad), "~/Data/COPING/coping_glad/gad_coping_glad.rds")
+saveRDS(get_survey_data(gad_coping_edgi), "~/Data/COPING/coping_edgi/gad_coping_edgi.rds")
+
+saveRDS(get_survey_data(phq_glad), "~/Data/COPING/glad/phq_glad.rds")
+saveRDS(get_survey_data(phq_ramp), "~/Data/COPING/ramp/phq_ramp.rds")
+saveRDS(get_survey_data(phq_coping_nbr), "~/Data/COPING/coping_nbr/phq_coping_nbr.rds")
+saveRDS(get_survey_data(phq_coping_glad), "~/Data/COPING/coping_glad/phq_coping_glad.rds")
+saveRDS(get_survey_data(phq_coping_edgi), "~/Data/COPING/coping_edgi/phq_coping_edgi.rds")

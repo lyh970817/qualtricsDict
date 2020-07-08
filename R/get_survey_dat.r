@@ -75,12 +75,15 @@ survey_recode <- function(dict, dat, keys, unanswer_recode, unanswer_recode_mult
   unique_newname <- unique(dict[[get_newname(dict)]])
 
   # How to determine which is ID column?
+  browser()
   keys <- c("Login ID", "startDate", "endDate", keys)
   dat_cols <- c(keys, unique_qids)
 
   newnames <- setNames(unique_qids, unique_newname)
   dat <- rename(dat[dat_cols], !!!newnames)
-
+  unique_qids %in% colnames(dat)
+  unique_qids[155]
+  colnames(dat)
   split_dict <- split(dict, factor(dict$qid))
   dat_vars <- map2_df(
     dat[unique_newname], split_dict, survey_item_recode,
