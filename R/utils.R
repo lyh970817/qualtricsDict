@@ -7,6 +7,7 @@
 #' @import stringdist
 #' @import slowraker
 #' @import qualtRics
+#' @import sjlabelled
 #' @importFrom magrittr %>%
 
 which_not_onetoone <- function(cols) {
@@ -112,11 +113,11 @@ survey_rename <- function(survey) {
 }
 
 get_newname <- function(dict) {
-  if ("qid" %in% colnames(dict)) {
-    colnames(dict)[2]
+  if ("easyname" %in% colnames(dict)) {
+    return("easyname")
   }
-  else {
-    colnames(dict)[1]
+  if ("question_name" %in% colnames(dict)) {
+    return("easyname")
   }
 }
 

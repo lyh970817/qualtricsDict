@@ -96,6 +96,11 @@ dict_merge <- function(dict,
   reference_dict[survey_name_ref] <- TRUE
   dict[survey_name] <- TRUE
 
+  lgl_not_label <- !colnames(dict) %in% c("label", newname)
+  colnames(dict)[lgl_not_label] <- paste(colnames(dict)[lgl_not_label],
+    survey_name,
+    sep = "_"
+  )
   merged <- full_join(reference_dict, dict,
     by = c(setNames(newname, newname_ref), "label"),
     suffix = c(
@@ -129,8 +134,13 @@ dict_merge <- function(dict,
   }) %>%
     unlist()
 
-  merged[to_fill_rows, grep(survey_name_ref, colnames(merged))] <-
-    merged[dup_ref_rows, grep(survey_name_ref, colnames(merged))]
+  to_fill_cols <- setdiff(grep(survey_name_ref,
+    colnames(merged),
+    value = T
+  ), survey_name_ref)
+
+  merged[to_fill_rows, to_fill_cols] <-
+    merged[dup_ref_rows, to_fill_cols]
 
   merged <- reorder(merged, newname_ref)
 

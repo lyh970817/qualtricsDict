@@ -24,4 +24,5 @@ Imports:
     tibble,
     slowraker,
     R.utils,
-    stringdist
+    stringdist,
+    sjlabelled
