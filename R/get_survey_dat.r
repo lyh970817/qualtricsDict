@@ -5,7 +5,7 @@ get_survey_data <- function(dict,
                             skip_mistakes = FALSE,
                             numeric_to_pos = FALSE,
                             numeric_to_pos_exclude = NULL,
-                            na_remove_keys = TRUE
+                            na_remove_keys = TRUE,
                             ...) {
   newname <- get_newname(dict)
   # First validate the dictionary
@@ -26,8 +26,8 @@ get_survey_data <- function(dict,
   args$convert <- FALSE
   args$label <- FALSE
   # What about text qids?
-  include_qids <- str_extract(dict[["qid"]], "QID[0-9]+")
-  args$include_questions <- include_qids
+  # include_qids <- str_extract(dict[["qid"]], "QID[0-9]+")
+  # args$include_questions <- include_qids
 
   survey <- do.call(fetch_survey, args)
 
@@ -86,12 +86,13 @@ survey_recode <- function(dict, dat, keys, unanswer_recode, unanswer_recode_mult
   newnames <- setNames(unique_qids, unique_newname)
   dat <- rename(dat[dat_cols], !!!newnames)
 
-  if (na_remove_keys) {
-    na_keys_lgl <- or(map(dat[keys], is.na))
-    dat <- dat[!na_keys_lgl, ]
-  }
+  # if (na_remove_keys) {
+  #   na_keys_lgl <- or(map(dat[keys], is.na))
+  #   dat <- dat[!na_keys_lgl, ]
+  # }
 
-  split_dict <- split(dict, factor(dict$qid))
+  # level = unique to preserve ordering
+  split_dict <- split(dict, factor(dict$qid, level = unique(dict$qid)))
   dat_vars <- map2_df(
     dat[unique_newname], split_dict,
     ~ survey_item_recode(.x, .y,
@@ -100,6 +101,7 @@ survey_recode <- function(dict, dat, keys, unanswer_recode, unanswer_recode_mult
       numeric_to_pos = numeric_to_pos
     )
   )
+
   dat <- bind_cols(
     dat[keys], dat_vars,
     setNames(

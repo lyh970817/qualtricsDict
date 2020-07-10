@@ -1,6 +1,5 @@
 devtools::load_all()
 library(googlesheets4)
-qualtRics::fetch_survey
 url <- "https://docs.google.com/spreadsheets/d/1Vp028XLxbcXeOdjeuI-3y-kVenKWDR4hW9iJ1tHpttI/edit#gid=935710032"
 
 # Read in the diff files from url
@@ -51,6 +50,7 @@ dict_coping3 <- dict_generate(coping_glad_ID, newname = "easyname", block_patter
 # GLAD
 valid_dem_glad <- dict_validate(dict_glad[["Demographics"]])
 dem_glad <- dict_glad[["Demographics"]]
+dem_glad %>% filter(easyname == "dem.polish")
 # write_sheet(dem_glad, ss = url, sheet = "GLAD_DEM")
 
 valid_dem_ramp <- dict_validate(dict_ramp[["COVID_Baseline_Demographics"]])
