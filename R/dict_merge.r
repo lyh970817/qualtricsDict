@@ -96,11 +96,17 @@ dict_merge <- function(dict,
   reference_dict[survey_name_ref] <- TRUE
   dict[survey_name] <- TRUE
 
-  lgl_not_label <- !colnames(dict) %in% c("label", newname)
-  colnames(dict)[lgl_not_label] <- paste(colnames(dict)[lgl_not_label],
-    survey_name,
-    sep = "_"
-  )
+  # If already more than 1 dictionary merged in reference_dict, manually
+  # add suffix to dict
+  n_indicator <- sum(map_lgl(reference_dict, is.logical))
+  if (n_indicator > 1) {
+    lgl_not_label <- !colnames(dict) %in% c("label", newname)
+    colnames(dict)[lgl_not_label] <- paste(colnames(dict)[lgl_not_label],
+      survey_name,
+      sep = "_"
+    )
+  }
+
   merged <- full_join(reference_dict, dict,
     by = c(setNames(newname, newname_ref), "label"),
     suffix = c(
@@ -110,8 +116,7 @@ dict_merge <- function(dict,
   ) %>%
     select(.data[[newname_ref]], everything())
 
-  dup_ref_names <- dict_diff[["name_reference"]] %>%
-    subset(duplicated(.))
+  dup_ref_names <- keep(dict_diff[["name_reference"]], duplicated)
 
   dup_names <- setdiff(
     make.unique(dict_diff[["name_reference"]]),
@@ -121,23 +126,29 @@ dict_merge <- function(dict,
   dup_ref_rows <- map2(dup_ref_names, dup_names, function(x, y) {
     x_rows <- which(reference_dict[[newname_ref]] == x)
     y_rows <- which(merged[[newname]] == y)
-    len <- ifelse(length(x_rows) < length(y_rows), length(x_rows), length(y_rows))
+    len <- ifelse(length(x_rows) < length(y_rows),
+      length(x_rows),
+      length(y_rows)
+    )
+    # Should be looking for matching labels instead
     x_rows[seq(len)]
   }) %>%
     unlist()
 
+  # Refactoring required
   to_fill_rows <- map2(dup_ref_names, dup_names, function(x, y) {
     x_rows <- which(reference_dict[[newname_ref]] == x)
     y_rows <- which(merged[[newname]] == y)
     len <- ifelse(length(x_rows) < length(y_rows), length(x_rows), length(y_rows))
+    # Should be looking for matching labels instead
     y_rows[seq(len)]
   }) %>%
     unlist()
 
-  to_fill_cols <- setdiff(grep(survey_name_ref,
-    colnames(merged),
-    value = T
-  ), survey_name_ref)
+  to_fill_cols <- setdiff(
+    grep(survey_name_ref, colnames(merged), value = T),
+    survey_name_ref
+  )
 
   merged[to_fill_rows, to_fill_cols] <-
     merged[dup_ref_rows, to_fill_cols]

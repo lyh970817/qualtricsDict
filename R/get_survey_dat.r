@@ -5,6 +5,7 @@ get_survey_data <- function(dict,
                             skip_mistakes = FALSE,
                             numeric_to_pos = FALSE,
                             numeric_to_pos_exclude = NULL,
+                            na_remove_keys = TRUE
                             ...) {
   newname <- get_newname(dict)
   # First validate the dictionary
@@ -24,7 +25,9 @@ get_survey_data <- function(dict,
   args$import_id <- TRUE
   args$convert <- FALSE
   args$label <- FALSE
-  # args$include_questions <- dict[["qid"]]
+  # What about text qids?
+  include_qids <- str_extract(dict[["qid"]], "QID[0-9]+")
+  args$include_questions <- include_qids
 
   survey <- do.call(fetch_survey, args)
 
@@ -80,9 +83,13 @@ survey_recode <- function(dict, dat, keys, unanswer_recode, unanswer_recode_mult
   # How to determine which is ID column?
   keys <- c("externalDataReference", "startDate", "endDate", keys)
   dat_cols <- c(keys, unique_qids)
-  unique_qids %in% colnames(dat)
   newnames <- setNames(unique_qids, unique_newname)
   dat <- rename(dat[dat_cols], !!!newnames)
+
+  if (na_remove_keys) {
+    na_keys_lgl <- or(map(dat[keys], is.na))
+    dat <- dat[!na_keys_lgl, ]
+  }
 
   split_dict <- split(dict, factor(dict$qid))
   dat_vars <- map2_df(
