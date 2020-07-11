@@ -12,8 +12,6 @@ diffs_dat <- map(diff_sheets, ~ read_sheet(url, sheet = .x)) %>%
 # to GLAD
 ramp_diff <- bind_rows(diffs_dat[grep("RAMP", names(diffs_dat))])
 coping_diff <- bind_rows(diffs_dat[grep("COPING", names(diffs_dat))])
-coping_diff[[1]]
-
 
 block_fun <- function(x) {
   tolower(str_match(x, "_([^_]+$)")[, -1])
@@ -25,7 +23,7 @@ glad_block_fun <- function(x) {
     x == "(AGoD) Panic Disorder" ~ "PANC",
     x == "(AGoD) Social phobia" ~ "SOPH",
     x == "(AGoD) Specific phobias" ~ "SEPH",
-    x == "Demographics" ~ "dem",
+    x == "Demographics" ~ "demographics",
     x == "General info/ study feedback" ~ "feed",
     x == "Standardised assessment of severity of personality disorder (SASPD)" ~ "SASPD",
     x == "UKBB MHQ Section A - General Mental Health" ~ "mhq",
@@ -47,10 +45,10 @@ dict_coping1 <- dict_generate(coping_nbr_ID, newname = "easyname", block_pattern
 dict_coping2 <- dict_generate(coping_glad_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
 dict_coping3 <- dict_generate(coping_glad_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
 
+
 # GLAD
 valid_dem_glad <- dict_validate(dict_glad[["Demographics"]])
 dem_glad <- dict_glad[["Demographics"]]
-dem_glad %>% filter(easyname == "dem.polish")
 # write_sheet(dem_glad, ss = url, sheet = "GLAD_DEM")
 
 valid_dem_ramp <- dict_validate(dict_ramp[["COVID_Baseline_Demographics"]])
@@ -130,7 +128,6 @@ write_sheet(merged_pcl, ss = url, sheet = "MERGED_PCL")
 # OCIR
 valid_ocir_ramp <- dict_validate(dict_ramp[["COVID_Baseline_OCI-R"]])
 ocir_ramp <- dict_ramp[["COVID_Baseline_OCI-R"]]
-ocir_ramp_dat <- get_survey_data(ocir_ramp, limit = 10, unanswer_recode_multi = 0, unanswer_recode = -77)
 
 # GAD
 gad_glad <- dict_glad[["UKBB MHQ: Section C - Anxiety"]]

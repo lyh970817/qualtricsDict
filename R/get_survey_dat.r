@@ -8,7 +8,8 @@ get_survey_data <- function(dict,
                             na_remove_keys = TRUE,
                             ...) {
   newname <- get_newname(dict)
-  # First validate the dictionary
+
+  # Validate the dictionary
   suppressWarnings(error_list <- dict_validate(dict)$error)
   if (!is.null(error_list$non_unique_names)) {
     return(error_list$non_unique_names)
@@ -26,12 +27,14 @@ get_survey_data <- function(dict,
   args$convert <- FALSE
   args$label <- FALSE
   # What about text qids?
-  # include_qids <- str_extract(dict[["qid"]], "QID[0-9]+")
-  # args$include_questions <- include_qids
+  include_qids <- unique(str_extract(dict[["qid"]], "QID[0-9]+"))
+  args$include_questions <- include_qids
 
   survey <- do.call(fetch_survey, args)
 
-  # survey_rename(survey)
+  # Not sure why underscore is appended when include_questions is specified
+  colnames(survey) <- str_remove(colnames(survey), "_$")
+
   # save(survey, file = "./cache/survey.RData")
   # load("./cache/survey.RData")
 
