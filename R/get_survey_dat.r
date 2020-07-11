@@ -133,7 +133,7 @@ survey_item_recode <- function(var, item_dict, unanswer_recode, unanswer_recode_
       labels <- yes
       if (!is.null(unanswer_recode_multi)) {
         levels <- c(levels, unanswer_recode_multi)
-        labels <- c(labels, paste("No", yes))
+        labels <- c(labels, paste("Not", yes))
       }
     }
 
