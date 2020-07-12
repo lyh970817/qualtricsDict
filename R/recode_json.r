@@ -56,6 +56,10 @@ recode_json <- function(surveyID, import_id,
 
     has_text <- which(map_lgl(qjson$choices, ~ "textEntry" %in% names(.x)))
 
+    if (qid == "QID644") {
+      browser()
+    }
+
     if (length(has_text) > 0) {
       # Add text level and labels directly after the non-text level
       level <- add_text(level, has_text)
@@ -117,9 +121,6 @@ recode_json <- function(surveyID, import_id,
       sub_selector = null_na(sub_selector)
     )
 
-    if (is.null(t)) {
-      browser()
-    }
     return(t)
   }) %>%
     bind_rows() %>%
@@ -223,7 +224,7 @@ recode_type <- function(json) {
 add_text <- function(x, has_text, label = F) {
   if (!is.null(x)) {
     for (i in seq_along(has_text)) {
-      pos <- has_text[i]
+      pos <- has_text[i] + (i - 1)
       text <- names(x)[pos]
       text_nm <- x[pos]
       x <- c(

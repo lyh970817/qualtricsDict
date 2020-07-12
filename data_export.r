@@ -191,7 +191,7 @@ pcl_coping_edgi <- dict_coping3[["COVID_Measures_PCL6"]]
 gad_coping_edgi <- dict_coping3[["COPING_Baseline_GAD7"]]
 phq_coping_edgi <- dict_coping3[["COPING_Baseline_PHQ9"]]
 
-saveRDS(get_survey_data(dem_glad, unanswer_recode_multi = 0), "~/Data/COPING/glad/dem_glad.rds")
+saveRDS(get_survey_data(dem_glad, unanswer_recode_multi = 0, limit = 100), "~/Data/COPING/glad/dem_glad.rds")
 saveRDS(get_survey_data(dem_ramp, unanswer_recode_multi = 0, keys = "Login ID"), "~/Data/COPING/ramp/dem_ramp.rds")
 saveRDS(get_survey_data(dem_coping, unanswer_recode_multi = 0, keys = "Login ID"), "~/Data/COPING/coping_nbr/dem_coping_nbr.rds")
 saveRDS(get_survey_data(dem_coping_glad, unanswer_recode_multi = 0), "~/Data/COPING/coping_glad/dem_coping_glad.rds")

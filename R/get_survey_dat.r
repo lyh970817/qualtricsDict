@@ -106,12 +106,12 @@ survey_recode <- function(dict, dat, keys, unanswer_recode, unanswer_recode_mult
   )
 
   dat <- bind_cols(
-    dat[keys], dat_vars,
-    setNames(
-      # There is a bug in this sjlabelled function
-      remove_all_labels(dat[unique_newname]),
-      paste(unique_newname, "numeric", sep = "_")
-    )
+    dat[keys], dat_vars
+    # setNames(
+    #   # There is a bug in this sjlabelled function
+    #   remove_all_labels(dat[unique_newname]),
+    #   paste(unique_newname, "numeric", sep = "_")
+    # )
   )
 
   return(dat)
@@ -126,21 +126,19 @@ survey_item_recode <- function(var, item_dict, unanswer_recode, unanswer_recode_
     }
   }
   else {
+    labels <- item_dict[["label"]]
+    levels <- item_dict[["level"]]
+
     if (all(item_dict[["type"]] == "Multiple Categorical")) {
-      # If only one row in dict it's multiple options
-      yes <- item_dict[["label"]]
       levels <- 1
-      labels <- yes
       if (!is.null(unanswer_recode_multi)) {
         levels <- c(levels, unanswer_recode_multi)
-        labels <- c(labels, paste("Not", yes))
+        labels <- c(labels, paste("Not", labels))
       }
     }
 
     # If multiple rows it's ordinal
     if (nrow(item_dict) > 1) {
-      labels <- item_dict[["label"]]
-      levels <- item_dict[["level"]]
       labels <- grep("TEXT", labels, invert = T, value = T)
       levels <- grep("TEXT", levels, invert = T, value = T)
     }
@@ -150,10 +148,12 @@ survey_item_recode <- function(var, item_dict, unanswer_recode, unanswer_recode_
       labels <- c(labels, "Seen but not answered")
     }
 
-    tryCatch(var <- factor(var, levels = levels, labels = labels), warn = function(e) browser())
+    var <- set_labels(var, labels = setNames(levels, labels))
+
+    # tryCatch(var <- factor(var, levels = levels, labels = labels), warn = function(e) browser())
   }
   text_label <- unique(paste(item_dict[["question"]], item_dict[["item"]]))
-  var <- sjlabelled::set_label(var, text_label)
+  var <- set_label(var, label = text_label)
 
   return(var)
 }
