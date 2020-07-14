@@ -37,8 +37,8 @@ dict_generate <- function(surveyID,
     dict[[newname]] <- recode(
       dict[[newname]],
       !!!setNames(
-        dict_diff[["name"]],
-        make.unique(dict_diff[["name_reference"]])
+        make.unique(dict_diff[["name_reference"]]),
+        dict_diff[["name"]]
       )
     )
   }

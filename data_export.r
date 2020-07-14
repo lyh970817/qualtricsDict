@@ -37,6 +37,7 @@ glad_block_fun <- function(x) {
   )
 }
 
+
 # How does the progress bar work?
 save.image("./.RData")
 dict_glad <- dict_generate(surveyID = gladID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
@@ -105,7 +106,7 @@ valid_pcl_glad <- dict_validate(dict_glad[["UKBB MHQ: Section F - Trauma"]])
 pcl_glad <- dict_glad[["UKBB MHQ: Section F - Trauma"]]
 
 valid_pcl_ramp <- dict_validate(dict_ramp[["COVID_Baseline_PTSD"]])
-pcl_ramp <- dict_ramp[["COVID_Baseline_PTSD"]]
+pcl_ramp <- dict_ramp[["COVID_Screening_PTSD"]]
 
 valid_pcl_coping <- dict_validate(dict_coping1[["COVID_Measures_PCL6"]])
 pcl_coping <- dict_coping1[["COVID_Measures_PCL6"]]
@@ -191,7 +192,7 @@ pcl_coping_edgi <- dict_coping3[["COVID_Measures_PCL6"]]
 gad_coping_edgi <- dict_coping3[["COPING_Baseline_GAD7"]]
 phq_coping_edgi <- dict_coping3[["COPING_Baseline_PHQ9"]]
 
-saveRDS(get_survey_data(dem_glad, unanswer_recode_multi = 0, limit = 100), "~/Data/COPING/glad/dem_glad.rds")
+saveRDS(get_survey_data(dem_glad, unanswer_recode_multi = 0), "~/Data/COPING/glad/dem_glad.rds")
 saveRDS(get_survey_data(dem_ramp, unanswer_recode_multi = 0, keys = "Login ID"), "~/Data/COPING/ramp/dem_ramp.rds")
 saveRDS(get_survey_data(dem_coping, unanswer_recode_multi = 0, keys = "Login ID"), "~/Data/COPING/coping_nbr/dem_coping_nbr.rds")
 saveRDS(get_survey_data(dem_coping_glad, unanswer_recode_multi = 0), "~/Data/COPING/coping_glad/dem_coping_glad.rds")

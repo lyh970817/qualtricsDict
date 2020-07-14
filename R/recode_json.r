@@ -13,7 +13,8 @@ recode_json <- function(surveyID, import_id,
     )
   )
 
-  qids_data <- discard(str_extract(colnames(survey), "QID[0-9]+"), is.na)
+  qids_data <- str_extract(colnames(survey), "QID[0-9]+") %>%
+    discard(is.na)
 
   mt <- metadata(surveyID,
     get = list(
@@ -23,6 +24,7 @@ recode_json <- function(surveyID, import_id,
       "responsecounts" = FALSE
     )
   )
+
   question_meta <- map(
     mt$questions, `[`,
     c(
@@ -56,9 +58,9 @@ recode_json <- function(surveyID, import_id,
 
     has_text <- which(map_lgl(qjson$choices, ~ "textEntry" %in% names(.x)))
 
-    if (qid == "QID644") {
-      browser()
-    }
+    # if (qid == "QID644") {
+    #   browser()
+    # }
 
     if (length(has_text) > 0) {
       # Add text level and labels directly after the non-text level
@@ -111,14 +113,17 @@ recode_json <- function(surveyID, import_id,
       level <- NA
     }
 
-    t <- tibble(
-      new_qid = qid,
-      qid, question_name, question,
-      item = rep(item, each = choice_len) %>% null_na(),
-      level = rep(level, times = sub_q_len) %>% null_na(),
-      label = rep(label, times = sub_q_len) %>% null_na(),
-      type, selector,
-      sub_selector = null_na(sub_selector)
+    tryCatch(
+      t <- tibble(
+        new_qid = qid,
+        qid, question_name, question,
+        item = rep(item, each = choice_len) %>% null_na(),
+        level = rep(level, times = sub_q_len) %>% null_na(),
+        label = rep(label, times = sub_q_len) %>% null_na(),
+        type, selector,
+        sub_selector = null_na(sub_selector)
+      ),
+      error = function(e) browser()
     )
 
     return(t)
@@ -139,7 +144,6 @@ recode_json <- function(surveyID, import_id,
     mutate(qid = new_qid) %>%
     select(qid, block, everything())
 
-  json %>% filter(qid == "QID125585254")
   json <- recode_type(json)
 
   if (import_id) {
@@ -227,13 +231,10 @@ add_text <- function(x, has_text, label = F) {
       pos <- has_text[i] + (i - 1)
       text <- names(x)[pos]
       text_nm <- x[pos]
-      x <- c(
-        x[1:pos],
+      x <- append(x,
         paste(text_nm, sep = "_", "TEXT"),
-        # This will produce NA, needs removal
-        x[pos + 1:length(x)]
-      ) %>%
-        discard(is.na)
+        after = pos
+      )
 
       # Required for sub
       names(x)[pos + 1] <- paste(text, sep = "_", "TEXT")

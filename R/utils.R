@@ -58,22 +58,6 @@ remove_format <- function(data, skip) {
     )
 }
 
-# survey_rename <- function(survey) {
-
-#   # Question mark for non-greedy match
-#   qid_pattern <- '\\{"ImportId":"(.+?)".+'
-#   qid_pattern_choice <- '\\{"ImportId":"(.+)","choiceId":"([-0-9]+)"'
-
-#   qid_rename <- str_match(colnames(survey), qid_pattern)[, 2]
-#   qid_rename_choice <- str_match(colnames(survey), qid_pattern_choice)
-#   qid_rename <- ifelse(is.na(qid_rename_choice[, 1]),
-#     qid_rename,
-#     paste(qid_rename_choice[, 2], qid_rename_choice[, 3], sep = "_")
-#   )
-
-#   return(setNames(survey, qid_rename))
-# }
-
 unique_expand <- function(x, ...) {
   # Suppose x = unique(x') and a one-to-one mapping between x and
   # unique(paste(...)),
@@ -87,22 +71,22 @@ unique_expand <- function(x, ...) {
   recode(y, !!!setNames(x, unique(y)))
 }
 
-reference_make_unique <- function(x, expand, y) {
-  # Create a unique mapping between set x and all pairs (expand, y),
-  # where for each e_i in expand there is k_i x_i in x (so that we can
-  # unique expand)
-  stopifnot(length(expand) == length(y))
+# reference_make_unique <- function(x, expand, y) {
+#   # Create a unique mapping between set x and all pairs (expand, y),
+#   # where for each e_i in expand there is k_i x_i in x (so that we can
+#   # unique expand)
+#   stopifnot(length(expand) == length(y))
 
-  expand_x <- unique_expand(x, expand)
-  # bind_cols() outputs a message for not giving colnames
-  # expand not required in the second column?
-  expand_unique_x <- suppressMessages(bind_cols(expand_x, expand, y) %>%
-    unique() %>%
-    pull(1) %>%
-    make.unique())
+#   expand_x <- unique_expand(x, expand)
+#   # bind_cols() outputs a message for not giving colnames
+#   # expand not required in the second column?
+#   expand_unique_x <- suppressMessages(bind_cols(expand_x, expand, y) %>%
+#     unique() %>%
+#     pull(1) %>%
+#     make.unique())
 
-  return(expand_unique_x)
-}
+#   return(expand_unique_x)
+# }
 
 survey_rename <- function(survey) {
   qid_cols_nosfx <- str_replace(colnames(survey), "(#[0-9])?_[0-9_]+", "")
@@ -147,4 +131,8 @@ or <- function(x) {
 
   lgl[is.na(lgl)] <- FALSE
   return(lgl)
+}
+
+split_orderd <- function(x, f) {
+  split(x, f = factor(f, level = unique(f)))
 }
