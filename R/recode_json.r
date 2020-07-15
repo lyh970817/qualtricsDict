@@ -35,7 +35,21 @@ recode_json <- function(surveyID, import_id,
     )
   )
 
+  blocks <- mt$blocks %>%
+    # set the names to block names so we can enframe
+    setNames(map_chr(., "description")) %>%
+    map("elements") %>%
+    map(~ unlist(map(.x, "questionId"))) %>%
+    enframe(value = "qid", name = "block") %>%
+    unnest(qid)
+
   question_meta <- question_meta[unique(qids_data)]
+  blocks <- pull(blocks[blocks$qid %in% unique(qids_data), "block"])
+  question_meta <- map2(question_meta, blocks, function(x, y) {
+    x["block"] <- y
+    return(x)
+  })
+
 
   json <- imap(question_meta, function(qjson, qid) {
     sub_q_len <- length(qjson$subQuestions) %>% ifelse(. > 0, ., 1)
@@ -46,6 +60,7 @@ recode_json <- function(surveyID, import_id,
     type <- qjson$questionType$type
     question <- qjson$questionText
     selector <- qjson$questionType$selector
+    block <- qjson$block
 
     # Levels have recodes and original levels
     # Labels have lbels and original levels
@@ -59,7 +74,7 @@ recode_json <- function(surveyID, import_id,
     has_text <- which(map_lgl(qjson$choices, ~ "textEntry" %in% names(.x)))
 
     # if (qid == "QID644") {
-    #   browser()
+    #   
     # }
 
     if (length(has_text) > 0) {
@@ -113,18 +128,16 @@ recode_json <- function(surveyID, import_id,
       level <- NA
     }
 
-    tryCatch(
       t <- tibble(
-        new_qid = qid,
-        qid, question_name, question,
+        qid,
+        block = block,
+        question_name, question,
         item = rep(item, each = choice_len) %>% null_na(),
         level = rep(level, times = sub_q_len) %>% null_na(),
         label = rep(label, times = sub_q_len) %>% null_na(),
         type, selector,
         sub_selector = null_na(sub_selector)
-      ),
-      error = function(e) browser()
-    )
+      )
 
     return(t)
   }) %>%
@@ -132,17 +145,6 @@ recode_json <- function(surveyID, import_id,
     # Don't get rid of bracekts in labels
     remove_format(skip = "label")
 
-  blocks <- mt$blocks %>%
-    # set the names to block names so we can enframe
-    setNames(map_chr(., "description")) %>%
-    map("elements") %>%
-    map(~ unlist(map(.x, "questionId"))) %>%
-    enframe(value = "qid", name = "block") %>%
-    unnest(qid)
-
-  json <- left_join(json, blocks, by = "qid") %>%
-    mutate(qid = new_qid) %>%
-    select(qid, block, everything())
 
   json <- recode_type(json)
 
@@ -202,7 +204,7 @@ recode_qids <- function(json, survey) {
           x[!has_text_lgl, "qid"][seq(length(non_text_qids)), ] <- non_text_qids
         }
         if (length(text_qids) > 0) {
-          tryCatch(x[has_text_lgl, "qid"] <- text_qids, error = function(e) browser())
+          x[has_text_lgl, "qid"] <- text_qids
         }
       }
       return(x)

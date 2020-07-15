@@ -1,8 +1,9 @@
 devtools::load_all()
 library(googlesheets4)
 url <- "https://docs.google.com/spreadsheets/d/1Vp028XLxbcXeOdjeuI-3y-kVenKWDR4hW9iJ1tHpttI/edit#gid=935710032"
-
+source("./surveyIDs.r")
 # Read in the diff files from url
+
 sheets <- sheet_names(url)
 diff_sheets <- sheets[grepl("DIFF", sheets)]
 diffs_dat <- map(diff_sheets, ~ read_sheet(url, sheet = .x)) %>%
@@ -12,6 +13,7 @@ diffs_dat <- map(diff_sheets, ~ read_sheet(url, sheet = .x)) %>%
 # to GLAD
 ramp_diff <- bind_rows(diffs_dat[grep("RAMP", names(diffs_dat))])
 coping_diff <- bind_rows(diffs_dat[grep("COPING", names(diffs_dat))])
+
 
 block_fun <- function(x) {
   tolower(str_match(x, "_([^_]+$)")[, -1])

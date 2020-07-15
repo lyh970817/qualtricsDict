@@ -150,7 +150,7 @@ survey_item_recode <- function(var, item_dict, unanswer_recode, unanswer_recode_
 
     var <- set_labels(var, labels = setNames(levels, labels))
 
-    # tryCatch(var <- factor(var, levels = levels, labels = labels), warn = function(e) browser())
+    # tryCatch(var <- factor(var, levels = levels, labels = labels), warn = function(e) )
   }
   text_label <- unique(paste_narm(item_dict[["question"]], item_dict[["item"]]))
   var <- set_label(var, label = text_label)

@@ -2,3 +2,4 @@ cache/
 surveydict/
 *.RData
 pkg_setup.r
+surveyIDs.r
