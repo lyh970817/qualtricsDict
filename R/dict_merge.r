@@ -1,11 +1,25 @@
 dict_merge <- function(dict,
-                       reference_dict,
+                       reference_dict = NULL,
                        dict_diff = NULL,
                        force_level = FALSE) {
+  newname <- get_newname(dict)
+
+  if (is.null(reference_dict)) {
+    dict[[newname]] <- recode(
+      dict[[newname]],
+      !!!setNames(
+        make.unique(dict_diff[["name_reference"]]),
+        dict_diff[["name"]]
+      )
+    )
+
+    return(dict)
+  }
+
   survey_name <- attr(dict, "survey_name")
   survey_name_ref <- attr(reference_dict, "survey_name")
 
-  newname <- get_newname(dict)
+  newname <- newname
   newname_ref <- get_newname(reference_dict)
 
   if (survey_name == survey_name_ref) {
@@ -15,7 +29,6 @@ dict_merge <- function(dict,
   if (any(duplicated(dict_diff$name))) {
     stop("Non-unique mapping in dict_diff.")
   }
-
 
   if (is.null(dict_diff)) {
     # Implement this

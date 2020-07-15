@@ -95,28 +95,6 @@ easyname_gen <- function(json, block_pattern, block_sep) {
     }
     return(tolower(str_replace_all(nm, "\\s", "_")))
   })
-  # %>%
-  #   make.unique()
-
-  # Specify regex pattern or a function?
-  # perhaps still a function
-  # and need to join columns of a matrix
-
-  # block_single <-
-  #   if (!is.null(block_pattern)) {
-  #     str_match(unique(json$block), block_pattern)[, -1] %>%
-  #       as_tibble() %>%
-  #       unite(x, everything(),
-  #         sep = block_sep,
-  #         remove = T,
-  #         na.rm = T
-  #       ) %>%
-  #       pull() %>%
-  #       tolower() %>%
-  #       make.unique()
-  #   } else {
-  #     NA
-  #   }
 
   block_single <-
     if (!is.null(block_pattern)) {
@@ -150,8 +128,8 @@ easyname_gen <- function(json, block_pattern, block_sep) {
     duplicated_easynames,
     not_duplicated_easynames
   )
-  json$easyname <- recode(json$qid, !!!setNames(all_easynames$easyname, all_easynames$qid))
 
+  json$easyname <- recode(json$qid, !!!setNames(all_easynames$easyname, all_easynames$qid))
   json$easyname <- str_remove_all(json$easyname, "[^0-9A-Za-z_\\.]")
 
   return(json)
