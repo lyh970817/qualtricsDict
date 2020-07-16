@@ -74,7 +74,7 @@ recode_json <- function(surveyID, import_id,
     has_text <- which(map_lgl(qjson$choices, ~ "textEntry" %in% names(.x)))
 
     # if (qid == "QID644") {
-    #   
+    #
     # }
 
     if (length(has_text) > 0) {
@@ -113,8 +113,7 @@ recode_json <- function(surveyID, import_id,
 
       # Supposedly we can easily add text here but needs testing
       item <- unlist(map(qjson$subQuestions, "choiceText"))
-
-      qid <- paste(qid, sep = "#", seq_along(unique(question))) %>%
+      qid <- paste(qid, sep = "#", seq(length(qjson$columns))) %>%
         map2(level_lens, rep) %>%
         unlist() %>%
         rep(times = length(item))
@@ -128,16 +127,16 @@ recode_json <- function(surveyID, import_id,
       level <- NA
     }
 
-      t <- tibble(
-        qid,
-        block = block,
-        question_name, question,
-        item = rep(item, each = choice_len) %>% null_na(),
-        level = rep(level, times = sub_q_len) %>% null_na(),
-        label = rep(label, times = sub_q_len) %>% null_na(),
-        type, selector,
-        sub_selector = null_na(sub_selector)
-      )
+    t <- tibble(
+      qid,
+      block = block,
+      question_name, question,
+      item = rep(item, each = choice_len) %>% null_na(),
+      level = rep(level, times = sub_q_len) %>% null_na(),
+      label = rep(label, times = sub_q_len) %>% null_na(),
+      type, selector,
+      sub_selector = null_na(sub_selector)
+    )
 
     return(t)
   }) %>%

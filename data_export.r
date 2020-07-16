@@ -44,6 +44,7 @@ glad_block_fun <- function(x) {
 save.image("./.RData")
 dict_glad <- dict_generate(surveyID = gladID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
 dict_ramp <- dict_generate(rampID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = ramp_diff)
+dict_edgi <- dict_generate(edgiID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 dict_coping1 <- dict_generate(coping_nbr_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
 dict_coping2 <- dict_generate(coping_glad_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
 dict_coping3 <- dict_generate(coping_glad_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)

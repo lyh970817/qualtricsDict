@@ -71,23 +71,6 @@ unique_expand <- function(x, ...) {
   recode(y, !!!setNames(x, unique(y)))
 }
 
-# reference_make_unique <- function(x, expand, y) {
-#   # Create a unique mapping between set x and all pairs (expand, y),
-#   # where for each e_i in expand there is k_i x_i in x (so that we can
-#   # unique expand)
-#   stopifnot(length(expand) == length(y))
-
-#   expand_x <- unique_expand(x, expand)
-#   # bind_cols() outputs a message for not giving colnames
-#   # expand not required in the second column?
-#   expand_unique_x <- suppressMessages(bind_cols(expand_x, expand, y) %>%
-#     unique() %>%
-#     pull(1) %>%
-#     make.unique())
-
-#   return(expand_unique_x)
-# }
-
 survey_rename <- function(survey) {
   qid_cols_nosfx <- str_replace(colnames(survey), "(#[0-9])?_[0-9_]+", "")
   qid_cols_all <- make.unique(qid_cols_nosfx)
