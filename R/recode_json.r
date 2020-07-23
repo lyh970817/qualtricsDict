@@ -127,19 +127,28 @@ recode_json <- function(surveyID, import_id,
       level <- NA
     }
 
-    t <- tibble(
-      qid,
-      block = block,
-      question_name, question,
-      item = rep(item, each = choice_len) %>% null_na(),
-      level = rep(level, times = sub_q_len) %>% null_na(),
-      label = rep(label, times = sub_q_len) %>% null_na(),
-      type, selector,
-      sub_selector = null_na(sub_selector)
+    t <- tryCatch(
+      tibble(
+        qid,
+        block = block,
+        question_name, question,
+        item = rep(item, each = choice_len) %>% null_na(),
+        level = rep(level, times = sub_q_len) %>% null_na(),
+        label = rep(label, times = sub_q_len) %>% null_na(),
+        type, selector,
+        sub_selector = null_na(sub_selector)
+      ),
+      error = function(e) {
+        warning("Unsuccessful question ", qid)
+        return(NULL)
+      }
     )
-
+    # if (qid == "QID124991659") {
+    #   browser()
+    # }
     return(t)
   }) %>%
+    discard(is.null) %>%
     bind_rows() %>%
     # Don't get rid of bracekts in labels
     remove_format(skip = "label")
@@ -163,7 +172,7 @@ recode_json <- function(surveyID, import_id,
 
 recode_qids <- function(json, survey) {
   colnames_survey <- colnames(survey)
-  colnames_survey_nosfx <- str_extract(colnames_survey, "QID[0-9]+(#[0-9]+)?")
+  colnames_survey_nosfx <- str_extract(colnames_survey, "^QID[0-9]+(#[0-9]+)?")
 
   json_sfx <- json %>%
     split(.$qid) %>%
@@ -203,7 +212,7 @@ recode_qids <- function(json, survey) {
           x[!has_text_lgl, "qid"][seq(length(non_text_qids)), ] <- non_text_qids
         }
         if (length(text_qids) > 0) {
-          x[has_text_lgl, "qid"] <- text_qids
+          tryCatch(x[has_text_lgl, "qid"] <- text_qids, error = function(e) browser())
         }
       }
       return(x)

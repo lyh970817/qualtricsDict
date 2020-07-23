@@ -9,11 +9,11 @@ diff_sheets <- sheets[grepl("DIFF", sheets)]
 diffs_dat <- map(diff_sheets, ~ read_sheet(url, sheet = .x)) %>%
   setNames(diff_sheets)
 
+
 # Create diff_files from ramp and coping, because we're merging everything
 # to GLAD
 ramp_diff <- bind_rows(diffs_dat[grep("RAMP", names(diffs_dat))])
 coping_diff <- bind_rows(diffs_dat[grep("COPING", names(diffs_dat))])
-
 
 block_fun <- function(x) {
   tolower(str_match(x, "_([^_]+$)")[, -1])
@@ -43,15 +43,20 @@ glad_block_fun <- function(x) {
 # How does the progress bar work?
 save.image("./.RData")
 dict_glad <- dict_generate(surveyID = gladID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
-dict_ramp <- dict_generate(rampID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = ramp_diff)
+dict_ramp <- dict_generate(rampID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 dict_edgi <- dict_generate(edgiID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
-dict_coping1 <- dict_generate(coping_nbr_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
+# Some strange qids starting with x11 that needs to be checked
+dict_edgiopt <- dict_generate(edgioptID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
+
+
+dict_coping1 <- dict_generate(copingID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 dict_coping2 <- dict_generate(coping_glad_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
 dict_coping3 <- dict_generate(coping_glad_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
 
 
 # GLAD
 valid_dem_glad <- dict_validate(dict_glad[["Demographics"]])
+
 dem_glad <- dict_glad[["Demographics"]]
 # write_sheet(dem_glad, ss = url, sheet = "GLAD_DEM")
 
@@ -60,9 +65,13 @@ dem_ramp <- dict_ramp[["COVID_Baseline_Demographics"]]
 
 valid_dem_coping1 <- dict_validate(dict_coping1[["COPING_Demographics"]])
 # Which demographics?
-dem_coping <- dict_coping1[["COPING_Demographics"]]
+dem_coping <- dict_coping1[["COVID_Baseline_Demographics"]]
 
-# dem_diff_ramp <- dict_compare(dict = dem_ramp, reference_dict = dem_glad, field = c("item"))
+dem_coping %>%
+  filter(grepl("QID124991659", qid)) %>%
+  select(1, 2, 3)
+
+dem_diff_ramp <- dict_compare(dict = dem_ramp, reference_dict = dem_glad, field = c("item"))
 # dem_diff_coping <- dict_compare(dict = dem_coping, reference_dict = dem_glad, field = c("item"))
 
 merged_dem <- dict_merge(dem_ramp, dem_glad, diffs_dat[["RAMP_GLAD_DEM_DIFF"]])

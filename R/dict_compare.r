@@ -14,7 +14,7 @@ dict_compare <- function(dict, reference_dict, field = "item", reference_survey 
   question <- do.call(paste_narm, as.list(dict[field]))
   question[question == ""] <- dict[["question"]][question == ""]
 
-  question_ref <- do.call(paste_narm, as.list(reference_dict[names(ref_field)]))
+  question_ref <- do.call(paste_narm, as.list(reference_dict[ref_field]))
   question_ref[question_ref == ""] <- reference_dict[[ref_question_field]][question_ref == ""]
 
   question_fuzzy <- ifelse(question %in% question_ref, NA, question)
