@@ -64,11 +64,14 @@ easyname_gen <- function(json, block_pattern, block_sep) {
   ma_lgl <- json$type == "Multiple Categorical"
   json$item[ma_lgl] <- paste(json$label[ma_lgl])
 
-  if (file.exists("./.keywords.RData")) {
-    load("./.keywords.RData")
+  surveyID <- paste(dim(json), collapse = "_")
+  file_path <- paste0("./", surveyID, "_keywords.RData")
+
+  if (file.exists(file_path)) {
+    load(file_path)
   }
 
-  if (!file.exists("./.keywords.RData") || length(unique(json$item)) != length(keywords)) {
+  if (!file.exists(file_path) || length(unique(json$item)) != length(keywords)) {
     message("Generating easy names...")
     keywords <- slowrake(str_remove_all(unique(json$item), "\\(.+\\)"),
       all_words = paste(json$item, collapse = ""), stop_pos = NULL
@@ -76,7 +79,7 @@ easyname_gen <- function(json, block_pattern, block_sep) {
   }
 
   # Refer to qualtrics package on how to cache the results
-  save(keywords, file = "./.keywords.RData")
+  save(keywords, file = file_path)
 
   keywords_single <- imap_chr(keywords, function(x, i) {
     if (all(is.na(x))) {
