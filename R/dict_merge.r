@@ -80,7 +80,7 @@ dict_merge <- function(dict,
         for (i in seq(nrow(levels_diff))) {
           warning(
             levels_diff[i, "name"], " and ", levels_diff[i, "name_reference"],
-            " have differing number of levels."
+            " have different number of levels."
           )
         }
       }
@@ -94,6 +94,7 @@ dict_merge <- function(dict,
         dict_diff[["question"]]
       )
     )
+
 
     dict[[newname]] <- recode(
       dict[[newname]],
@@ -170,24 +171,3 @@ dict_merge <- function(dict,
 
   return(merged)
 }
-
-# name_map_merge <- function(ref, x, name_cols = c(1, 1), name_map, ...) {
-#   args <- list(...)
-#   by_ref <- names(args[["by"]])
-#   by_x <- args[["by"]]
-
-#   ref_df <- as.data.frame(ref)
-#   rownames(ref_df) <- ref_df[[1]]
-
-#   x_df <- as.data.frame(x)
-#   rownames(x_df) <- x_df[[1]]
-
-#   x_df[name_map[[2]], by_x] <- ref_df[name_map[[1]], by_ref]
-
-#   merged <- full_join(as_tibble(x_df),
-#     as_tibble(ref_df),
-#     by = by,
-#     ...
-#   )
-#   return(merged)
-# }

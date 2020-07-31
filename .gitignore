@@ -3,3 +3,4 @@ surveydict/
 *.RData
 pkg_setup.r
 surveyIDs.r
+Data_export2020-07-15COPY_for_check.Rmd

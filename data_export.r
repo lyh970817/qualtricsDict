@@ -10,6 +10,9 @@ diffs_dat <- map(diff_sheets, ~ read_sheet(url, sheet = .x)) %>%
   setNames(diff_sheets)
 
 
+load(file = "~/Downloads/dic_intm2020-07-30.RData")
+rm("dict_merge")
+
 # Create diff_files from ramp and coping, because we're merging everything
 # to GLAD
 ramp_diff <- bind_rows(diffs_dat[grep("RAMP", names(diffs_dat))])
@@ -46,12 +49,27 @@ dict_glad <- dict_generate(surveyID = gladID, newname = "easyname", block_patter
 dict_ramp <- dict_generate(rampID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 dict_edgi <- dict_generate(edgiID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 # Some strange qids starting with x11 that needs to be checked
-dict_edgiopt <- dict_generate(edgioptID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
+dict_edgiopt <- dict_generate(copingID2, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 
 
 dict_coping1 <- dict_generate(copingID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
-dict_coping2 <- dict_generate(coping_glad_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
-dict_coping3 <- dict_generate(coping_glad_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
+dict_coping2 <- dict_generate(copingID2, newname = "easyname", block_pattern = block_fun, split_by_block = T)
+dict_coping3 <- dict_generate(coping_edgi_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
+
+dem_edgi <- dict_edgi[["Part 1 - Demographics and personal information"]]
+dem_glad <- dict_glad[["Demographics"]]
+rm(list = "dict_merge")
+dem_diff_edgi_vs_glad <- dict_compare(
+  dict = dem_edgi, # the dictionary to compare
+  reference_dict = dem_glad, # the reference dictionary
+  field = c("item") # comparison based on item
+)
+
+merged_dem1 <- dict_merge(
+  dict = dem_edgi, # Dictionary to check
+  dict_diff = dem_diff_edgi_vs_glad #
+)
+
 
 
 # GLAD

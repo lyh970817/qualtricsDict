@@ -92,6 +92,10 @@ recode_json <- function(surveyID, import_id,
       sub_q_len <- sub_q_len + 1
     }
 
+    # if (qid == "QID682") {
+    #   browser()
+    # }
+
     # Zero length columns means it's a carried forward question
     if (type == "SBS" & length(qjson$columns) != 0) {
       # Reuse matrix code
@@ -127,6 +131,7 @@ recode_json <- function(surveyID, import_id,
       level <- NA
     }
 
+
     t <- tryCatch(
       tibble(
         qid,
@@ -143,9 +148,7 @@ recode_json <- function(surveyID, import_id,
         return(NULL)
       }
     )
-    # if (qid == "QID124991659") {
-    #   browser()
-    # }
+
     return(t)
   }) %>%
     discard(is.null) %>%
@@ -164,7 +167,7 @@ recode_json <- function(surveyID, import_id,
   }
 
 
-  attr(json, "survey_name") <- mt$metadata$name
+  attr(json, "survey_name") <- as.character(mt$metadata$name)
   attr(json, "surveyID") <- surveyID
 
   return(json)
@@ -207,7 +210,7 @@ recode_qids <- function(json, survey) {
 
         if (length(non_text_qids) > 0) {
           if (nrow(x[!has_text_lgl, "qid"]) != length(non_text_qids)) {
-            warning("Unexported level in ", n, " is not supported")
+            warning("Excluded levels in ", n, " is not supported")
           }
           x[!has_text_lgl, "qid"][seq(length(non_text_qids)), ] <- non_text_qids
         }
