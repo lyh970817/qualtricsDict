@@ -174,7 +174,7 @@ recode_json <- function(surveyID, import_id,
 }
 
 recode_qids <- function(json, survey) {
-  colnames_survey <- colnames(survey)
+  colnames_survey <- str_remove(colnames(survey), "_$")
   colnames_survey_nosfx <- str_extract(colnames_survey, "^QID[0-9]+(#[0-9]+)?")
 
   json_sfx <- json %>%
@@ -221,7 +221,7 @@ recode_qids <- function(json, survey) {
       return(x)
     }) %>%
     bind_rows() %>%
-    filter(qid %in% colnames(survey))
+    filter(qid %in% colnames_survey)
 }
 
 recode_type <- function(json) {

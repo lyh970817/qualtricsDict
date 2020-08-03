@@ -18,6 +18,8 @@ rm("dict_merge")
 ramp_diff <- bind_rows(diffs_dat[grep("RAMP", names(diffs_dat))])
 coping_diff <- bind_rows(diffs_dat[grep("COPING", names(diffs_dat))])
 
+glad_ocir_ID <- "SV_cHoVcYn5DCAm3eR"
+
 block_fun <- function(x) {
   tolower(str_match(x, "_([^_]+$)")[, -1])
 }
@@ -45,7 +47,10 @@ glad_block_fun <- function(x) {
 
 # How does the progress bar work?
 save.image("./.RData")
+
 dict_glad <- dict_generate(surveyID = gladID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
+dict_glad <- dict_generate(surveyID = glad_ocir_ID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
+
 dict_ramp <- dict_generate(rampID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 dict_edgi <- dict_generate(edgiID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 # Some strange qids starting with x11 that needs to be checked
