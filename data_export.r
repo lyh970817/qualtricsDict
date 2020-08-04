@@ -9,6 +9,21 @@ diff_sheets <- sheets[grepl("DIFF", sheets)]
 diffs_dat <- map(diff_sheets, ~ read_sheet(url, sheet = .x)) %>%
   setNames(diff_sheets)
 
+dict_gad_opt <- dict_edgiopt[["Module 2: Thoughts & behaviours"]]
+diff <- dict_compare(dict_gad_opt, dict_glad[["UKBB MHQ: Section C - Anxiety"]])
+diff[["name_reference"]]
+gad_names_opt <- diff %>%
+  filter(identical == TRUE & label_match == TRUE) %>%
+  pull(name)
+
+gad_names_opt <- diff %>%
+  filter(identical & label_match) %>%
+  pull(name)
+
+dict_gad_opt %>%
+  filter(dict_gad_opt$easyname %in% gad_names_opt) %>%
+  select(question) %>%
+  pull()
 
 load(file = "~/Downloads/dic_intm2020-07-30.RData")
 rm("dict_merge")
@@ -17,8 +32,14 @@ rm("dict_merge")
 # to GLAD
 ramp_diff <- bind_rows(diffs_dat[grep("RAMP", names(diffs_dat))])
 coping_diff <- bind_rows(diffs_dat[grep("COPING", names(diffs_dat))])
+employment_coping_glad <- dict_coping_glad[["COVID_Baseline_Employment"]]
+valid_employment_coping_glad <- dict_validate(dict = employment_coping_glad)
+get_survey_data(
+  dict = employment_coping_glad,
+  unanswer_recode_multi = 0,
+  limit = 100
+)
 
-glad_ocir_ID <- "SV_cHoVcYn5DCAm3eR"
 
 block_fun <- function(x) {
   tolower(str_match(x, "_([^_]+$)")[, -1])
@@ -44,9 +65,9 @@ glad_block_fun <- function(x) {
   )
 }
 
-
 # How does the progress bar work?
 save.image("./.RData")
+
 
 dict_glad <- dict_generate(surveyID = gladID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
 dict_glad <- dict_generate(surveyID = glad_ocir_ID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
@@ -54,8 +75,14 @@ dict_glad <- dict_generate(surveyID = glad_ocir_ID, newname = "easyname", block_
 dict_ramp <- dict_generate(rampID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 dict_edgi <- dict_generate(edgiID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 # Some strange qids starting with x11 that needs to be checked
-dict_edgiopt <- dict_generate(copingID2, newname = "easyname", block_pattern = block_fun, split_by_block = T)
+dict_edgiopt <- dict_generate(edgi_optional_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 
+dict_gad_opt <- dict_edgiopt[["Module 2: Thoughts & behaviours"]]
+diff <- dict_compare(dict_gad_opt, dict_glad[["UKBB MHQ: Section C - Anxiety"]])
+gad_names_opt <- diff %>%
+  filter(identical & label_match) %>%
+  pull(name)
+dict_gad_opt %>% filter(dict_gad_opt$easyname %in% gad_names_opt)
 
 dict_coping1 <- dict_generate(copingID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 dict_coping2 <- dict_generate(copingID2, newname = "easyname", block_pattern = block_fun, split_by_block = T)
@@ -74,7 +101,6 @@ merged_dem1 <- dict_merge(
   dict = dem_edgi, # Dictionary to check
   dict_diff = dem_diff_edgi_vs_glad #
 )
-
 
 
 # GLAD
@@ -258,3 +284,24 @@ saveRDS(get_survey_data(phq_coping_glad, unanswer_recode_multi = 0), "~/Data/COP
 saveRDS(get_survey_data(phq_coping_edgi, unanswer_recode_multi = 0), "~/Data/COPING/coping_edgi/phq_coping_edgi.rds")
 
 saveRDS(get_survey_data(ocir_ramp, unanswer_recode_multi = 0), "~/Data/COPING/ramp/ocir_ramp.rds")
+
+mhd_glad <- dict_glad[["UKBB MHQ Section A - General Mental Health"]]
+mhd_edgi <- dict_edgi[["Part 3 - ED100K Screening questions - Section A"]]
+mhd_edgi[c(48, 18), ]
+dim(mhd_edgi)
+valid_mhd_edgi <- dict_validate(dict = mhd_edgi)
+# Compare with GLAD
+mhd_diff_edgi_vs_glad <- dict_compare(dict = mhd_edgi, reference_dict = mhd_glad, field = c("item"))
+mhd_diff_edgi_vs_glad[["name_reference"]]
+# Upload the diff files to googlesheets and double check them
+write_sheet(mhd_diff_edgi_vs_glad, ss = url, sheet = "EDGI_vs_GLAD_MHD_DIFF")
+# Write sheet
+write_sheet(mhd_edgi, ss = url, sheet = "EDGI_MHD")
+saveRDS(
+  object =
+    get_survey_data(
+      dict = mhd_edgi,
+      unanswer_recode_multi = 0
+    ),
+  file = paste0("../data_raw/", date, "/edgi/mhd_edgi.rds")
+)

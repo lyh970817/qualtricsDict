@@ -121,6 +121,7 @@ easyname_gen <- function(json, block_pattern, block_sep) {
   # Add txt to text questions
   txt_qs <- grep("_TEXT", json$qid)
   json$easyname[txt_qs] <- paste(json$easyname[txt_qs], ".txt")
+  json$easyname <- str_remove_all(json$easyname, "[^0-9A-Za-z_\\.]")
 
   duplicated_easynames <- which_not_onetoone(json[c("easyname", "qid")])[[1]]
   duplicated_easynames["easyname"] <- make.unique(duplicated_easynames[["easyname"]])
@@ -133,7 +134,6 @@ easyname_gen <- function(json, block_pattern, block_sep) {
   )
 
   json$easyname <- recode(json$qid, !!!setNames(all_easynames$easyname, all_easynames$qid))
-  json$easyname <- str_remove_all(json$easyname, "[^0-9A-Za-z_\\.]")
 
   return(json)
 
