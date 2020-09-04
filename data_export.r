@@ -25,8 +25,16 @@ dict_gad_opt %>%
   select(question) %>%
   pull()
 
-load(file = "~/Downloads/dic_intm2020-07-30.RData")
-rm("dict_merge")
+load(file = "~/Downloads/dic_intm2020-08-05.RData")
+pcl_ramp
+get_survey_data(
+  dict = pcl_ramp,
+  unanswer_recode_multi = 0,
+  keys = "Login ID"
+)
+
+str(pcl_ramp)
+rm("get_survey_data")
 
 # Create diff_files from ramp and coping, because we're merging everything
 # to GLAD

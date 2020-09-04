@@ -28,11 +28,14 @@ get_survey_data <- function(dict,
   args$label <- FALSE
   # What about text qids?
   include_qids <- unique(str_extract(dict[["qid"]], "QID[0-9]+"))
-  args$include_questions <- include_qids
+  # Somehow doesn't work when there is only one question
+  if (length(include_qids) > 1) {
+    args$include_questions <- include_qids
+  }
 
   survey <- do.call(fetch_survey, args)
 
-  # Not sure why underscore is appended when include_questions is specified
+  # Not sure why underscore is appended sometimes when include_questions is specified
   colnames(survey) <- str_remove(colnames(survey), "_$")
 
   # save(survey, file = "./cache/survey.RData")
