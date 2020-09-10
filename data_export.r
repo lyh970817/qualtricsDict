@@ -76,7 +76,6 @@ glad_block_fun <- function(x) {
 # How does the progress bar work?
 save.image("./.RData")
 
-
 dict_glad <- dict_generate(surveyID = gladID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
 dict_glad <- dict_generate(surveyID = glad_ocir_ID, newname = "easyname", block_pattern = glad_block_fun, split_by_block = T)
 
@@ -92,12 +91,44 @@ gad_names_opt <- diff %>%
   pull(name)
 dict_gad_opt %>% filter(dict_gad_opt$easyname %in% gad_names_opt)
 
-dict_coping1 <- dict_generate(copingID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
+dict_ramp <- dict_generate(rampID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
+neuros <- grep("Neuro_", names(dict_ramp), v = T)
+walk(neuros, function(x) {
+  try(saveRDS(
+    object =
+      get_survey_data(
+        dict = dict_ramp[[x]],
+        keys = "Login ID",
+        unanswer_recode_multi = 0
+      ),
+    file = paste0("~/Data/COPING/ramp/", paste0(tolower(str_split(x, "_")[[1]][3])), "_ramp.rds")
+  ))
+})
+
+
+dict_coping <- dict_generate(coping_edgi_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T)
+neuros <- grep("Neuro_", names(dict_coping), v = T)
+walk(neuros, function(x) {
+  try(saveRDS(
+    object =
+      get_survey_data(
+        dict = dict_coping[[x]],
+        keys = "Login ID",
+        unanswer_recode_multi = 0
+      ),
+    file = paste0("~/Data/COPING/coping_edgi/", paste0(tolower(str_split(x, "_")[[1]][3])), "_coping_edgi.rds")
+  ))
+  print(x)
+})
+
 dict_coping2 <- dict_generate(copingID2, newname = "easyname", block_pattern = block_fun, split_by_block = T)
 dict_coping3 <- dict_generate(coping_edgi_ID, newname = "easyname", block_pattern = block_fun, split_by_block = T, dict_diff = coping_diff)
 
 dem_edgi <- dict_edgi[["Part 1 - Demographics and personal information"]]
+dem_edgi[["qid"]]
 dem_glad <- dict_glad[["Demographics"]]
+dem_edgi %>% filter(grepl("QID647", qid))
+
 rm(list = "dict_merge")
 dem_diff_edgi_vs_glad <- dict_compare(
   dict = dem_edgi, # the dictionary to compare
@@ -305,11 +336,12 @@ mhd_diff_edgi_vs_glad[["name_reference"]]
 write_sheet(mhd_diff_edgi_vs_glad, ss = url, sheet = "EDGI_vs_GLAD_MHD_DIFF")
 # Write sheet
 write_sheet(mhd_edgi, ss = url, sheet = "EDGI_MHD")
+
 saveRDS(
   object =
     get_survey_data(
-      dict = mhd_edgi,
+      dict = dict_coping1[["COVID_Baseline_Health_Respiratory"]],
       unanswer_recode_multi = 0
     ),
-  file = paste0("../data_raw/", date, "/edgi/mhd_edgi.rds")
+  file = "~/Data/COPING/coping_nbr/respiratory_nbr.rds"
 )

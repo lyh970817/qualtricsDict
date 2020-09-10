@@ -151,7 +151,7 @@ survey_item_recode <- function(var, item_dict, unanswer_recode, unanswer_recode_
       labels <- c(labels, "Seen but not answered")
     }
 
-    tryCatch(var <- set_labels(var, labels = setNames(levels, labels)), error = function(e) browser())
+    var <- set_labels(var, labels = setNames(levels, labels))
 
     # tryCatch(var <- factor(var, levels = levels, labels = labels), warn = function(e) )
   }
